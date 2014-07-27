@@ -1,11 +1,16 @@
 package app
 
-import "github.com/revel/revel"
+import (
+	"RPGithub/api"
+	"RPGithub/crons"
+	"github.com/revel/revel"
+	"github.com/revel/revel/modules/jobs/app/jobs"
+)
 
 func init() {
 	// Filters is the default set of global filters.
 	revel.Filters = []revel.Filter{
-		revel.PanicFilter,             // Recover from panics and display an error page instead.
+		api.PanicFilter,               // Recover from panics and display an error page instead.
 		revel.RouterFilter,            // Use the routing table to select the right Action
 		revel.FilterConfiguringFilter, // A hook for adding or removing per-Action filters.
 		revel.ParamsFilter,            // Parse parameters into Controller.Params.
@@ -20,9 +25,9 @@ func init() {
 	}
 
 	// register startup functions with OnAppStart
-	// ( order dependent )
-	// revel.OnAppStart(InitDB())
-	// revel.OnAppStart(FillCache())
+	revel.OnAppStart(func() {
+		jobs.Schedule("cron.import", crons.Import{})
+	})
 }
 
 // TODO turn this into revel.HeaderFilter
