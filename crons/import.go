@@ -1,7 +1,9 @@
 package crons
 
 import (
+	"RPGithub/app/dao"
 	"compress/gzip"
+	"encoding/json"
 	"fmt"
 	"github.com/revel/revel"
 	"io"
@@ -106,6 +108,9 @@ func (this *Import) parse(data string) error {
 	array := strings.Split(data, "\n")
 
 	for _, event := range array {
+		var jsonmap map[string]interface{}
+		_ = json.Unmarshal([]byte(event), &jsonmap)
+		dao.Database.Set(jsonmap, dao.COLLECTION_USER)
 		fmt.Println(event)
 		break
 	}

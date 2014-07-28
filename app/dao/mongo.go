@@ -11,7 +11,7 @@ type Mongo struct {
 }
 
 var (
-	mongo *Mongo
+	Database *Mongo
 )
 
 // Collections available
@@ -45,8 +45,8 @@ func (this *Mongo) UpdateQuery(query, data interface{}, collection string) error
 	return this.db.C(collection).Update(query, data)
 }
 
-// init mongo session
-func init() {
+// InitDatabse initialize the mongodb session
+func InitDatabase() {
 	var url string
 	address := revel.Config.StringDefault("mongo.address", "127.0.0.1")
 	port := revel.Config.StringDefault("mongo.port", "27017")
@@ -59,5 +59,5 @@ func init() {
 
 	db := session.DB(revel.Config.StringDefault("mongo.database", "RPGithub"))
 
-	mongo = &Mongo{db}
+	Database = &Mongo{db}
 }

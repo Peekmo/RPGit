@@ -2,6 +2,7 @@ package app
 
 import (
 	"RPGithub/api"
+	"RPGithub/app/dao"
 	"RPGithub/crons"
 	"github.com/revel/revel"
 	"github.com/revel/revel/modules/jobs/app/jobs"
@@ -26,6 +27,10 @@ func init() {
 
 	// register startup functions with OnAppStart
 	revel.OnAppStart(func() {
+		// Init database
+		dao.InitDatabase()
+
+		// Defines CRONS
 		jobs.Schedule("cron.import", crons.Import{})
 	})
 }
