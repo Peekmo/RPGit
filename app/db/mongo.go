@@ -1,4 +1,4 @@
-package dao
+package db
 
 import (
 	"fmt"
@@ -16,8 +16,9 @@ var (
 
 // Collections available
 const (
-	COLLECTION_USER = "User"
-	COLLECTION_ORG  = "Organization"
+	COLLECTION_USER         = "User"
+	COLLECTION_REPOSITORY   = "Repository"
+	COLLECTION_ORGANIZATION = "Organization"
 )
 
 // Set a document in the database

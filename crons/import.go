@@ -1,7 +1,8 @@
 package crons
 
 import (
-	"RPGithub/app/dao"
+	"RPGithub/app/db"
+	"RPGithub/app/model"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,28 @@ import (
 	"strings"
 	"time"
 )
+
+type ImportedData struct {
+	Type       string          `json:"type"`
+	User       ActorAttributes `json:"actor_attributes"`
+	Repository Repository      `json:"repository"`
+}
+
+type ActorAttributes struct {
+	Login string `json:"login"`
+	Type  string `json:"type"`
+}
+
+type Repository struct {
+	Language     string `json:"language"`
+	Organization string `json:"organization"`
+	Stars        int    `json:"stargazers"`
+	Size         int    `json:"size"`
+	Id           int    `json:"id"`
+	Url          string `json:"url"`
+	Owner        string `json:"owner"`
+	Name         string `json:"name"`
+}
 
 // Structure that implements the Job interface
 type Import struct{}
@@ -108,10 +131,38 @@ func (this *Import) parse(data string) error {
 	array := strings.Split(data, "\n")
 
 	for _, event := range array {
-		var jsonmap map[string]interface{}
+
+		var jsonmap ImportedData
 		_ = json.Unmarshal([]byte(event), &jsonmap)
-		dao.Database.Set(jsonmap, dao.COLLECTION_USER)
-		fmt.Println(event)
+
+		if jsonmap.User.Type != "User" {
+			continue
+		}
+
+		var user *model.User
+
+		userData := db.Database.Get(strings.ToLower(jsonmap.User.Login), db.COLLECTION_USER)
+		err := userData.One(&user)
+		if err != nil {
+			revel.INFO.Printf("Get user %s : %s", jsonmap.User.Login, err)
+
+			// New user
+			user = model.NewUser(jsonmap.User.Login)
+
+			// Register the user
+			err = db.Database.Set(user, db.COLLECTION_USER)
+			if err != nil {
+				revel.ERROR.Fatalf("Error while saving new user : %s", err)
+			}
+		}
+
+		_ = user.GetLanguage(jsonmap.Repository.Language)
+		err = db.Database.Update(user.Id, user, db.COLLECTION_USER)
+		if err != nil {
+			revel.ERROR.Fatalf("Error while updating user : %s", err)
+		}
+
+		// fmt.Println(event)
 		break
 	}
 
