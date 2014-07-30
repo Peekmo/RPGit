@@ -19,6 +19,7 @@ type ImportedData struct {
 	Type       string          `json:"type"`
 	User       ActorAttributes `json:"actor_attributes"`
 	Repository Repository      `json:"repository"`
+	Payload    Payload         `json:"payload"`
 }
 
 type ActorAttributes struct {
@@ -26,16 +27,27 @@ type ActorAttributes struct {
 	Type  string `json:"type"`
 }
 
+type Payload struct {
+	Action string `json:"action"`
+}
+
 type Repository struct {
 	Language     string `json:"language"`
 	Organization string `json:"organization"`
-	Stars        int    `json:"stargazers"`
+	Stars        int    `json:"stargazers_count"`
 	Size         int    `json:"size"`
 	Id           int    `json:"id"`
 	Url          string `json:"url"`
 	Owner        string `json:"owner"`
 	Name         string `json:"name"`
+	Wiki         bool   `json:"has_wiki"`
+	Downloads    bool   `json:"has_downloads"`
+	Forks        int    `json:"forks_count"`
+	Issues       int    `json:"open_issues_count"`
+	IsFork       bool   `json:"fork"`
 }
+
+var steps [12]int = [12]int{5, 10, 30, 50, 100, 300, 500, 1000, 3000, 5000, 10000, 100000000}
 
 // Structure that implements the Job interface
 type Import struct{}
@@ -129,16 +141,20 @@ func (this *Import) ungzip(file string) (string, error) {
 // parse the given json string and updates the database with it
 func (this *Import) parse(data string) error {
 	array := strings.Split(data, "\n")
+	var total int = len(array)
 
-	for _, event := range array {
+	for key, event := range array {
+		revel.INFO.Printf("-> Event %d/%d", key, total)
 
 		var jsonmap ImportedData
 		_ = json.Unmarshal([]byte(event), &jsonmap)
 
+		// Only user type for moment
 		if jsonmap.User.Type != "User" {
 			continue
 		}
 
+		// ------------------------------------- GET USER
 		var user *model.User
 
 		userData := db.Database.Get(strings.ToLower(jsonmap.User.Login), db.COLLECTION_USER)
@@ -156,14 +172,116 @@ func (this *Import) parse(data string) error {
 			}
 		}
 
-		_ = user.GetLanguage(jsonmap.Repository.Language)
+		// ------------------------------------- GET REPOSITORY
+		var repository *model.Repository
+
+		repositoryData := db.Database.Get(jsonmap.Repository.Id, db.COLLECTION_REPOSITORY)
+		err = repositoryData.One(&repository)
+		if err != nil {
+			revel.INFO.Printf("Get repository %s : %s", jsonmap.Repository.Id, err)
+
+			// New repository
+			repository = model.NewRepository(
+				jsonmap.Repository.Id,
+				jsonmap.Repository.Name,
+			)
+
+			// Register the repository
+			err = db.Database.Set(repository, db.COLLECTION_REPOSITORY)
+			if err != nil {
+				revel.ERROR.Fatalf("Error while saving new repository : %s", err)
+			}
+		}
+
+		repository.Size = jsonmap.Repository.Size
+		repository.Url = jsonmap.Repository.Url
+		repository.Language = jsonmap.Repository.Language
+		repository.Owner = jsonmap.Repository.Owner
+		repository.Organization = jsonmap.Repository.Organization
+		repository.Wiki = jsonmap.Repository.Wiki
+		repository.Downloads = jsonmap.Repository.Downloads
+		repository.Forks = jsonmap.Repository.Forks
+		repository.Stars = jsonmap.Repository.Stars
+		repository.Issues = jsonmap.Repository.Issues
+		repository.IsFork = jsonmap.Repository.IsFork
+
+		language := user.GetLanguage(jsonmap.Repository.Language)
+
+		// --------------------------------- UPDATES
+		switch jsonmap.Type {
+		case "PushEvent":
+			language.Events.Pushes += 1
+			for key, value := range steps {
+				if jsonmap.Repository.Stars < value {
+					language.Experience += 50 * (key + (key + 1))
+					break
+				}
+			}
+
+		case "CreateEvent":
+			language.Experience += 1
+			language.Events.Creates += 1
+
+		case "DeleteEvent":
+			language.Experience += 1
+			language.Events.Deletes += 1
+
+		case "IssuesEvent":
+			language.Events.Issues += 1
+			for key, value := range steps {
+				if jsonmap.Repository.Stars < value {
+					language.Experience += 5 * (key + (key + 1))
+					break
+				}
+			}
+
+		case "IssueCommentEvent":
+			language.Events.Comments += 1
+			for key, value := range steps {
+				if jsonmap.Repository.Stars < value {
+					language.Experience += 1 * (key + (key + 1))
+					break
+				}
+			}
+
+		case "WatchEvent":
+			language.Events.Stars += 1
+			language.Experience += 1
+
+		case "ForkEvent":
+			language.Events.Forks += 1
+			language.Experience += 5
+
+		case "PullRequestEvent":
+			language.Events.Pullrequests += 1
+			for key, value := range steps {
+				if jsonmap.Repository.Stars < value {
+					language.Experience += 300 * (key + (key + 1))
+					break
+				}
+			}
+
+		case "PullRequestReviewCommentEvent":
+			language.Events.Comments += 1
+			for key, value := range steps {
+				if jsonmap.Repository.Stars < value {
+					language.Experience += 1 * (key + (key + 1))
+					break
+				}
+			}
+		}
+
 		err = db.Database.Update(user.Id, user, db.COLLECTION_USER)
 		if err != nil {
 			revel.ERROR.Fatalf("Error while updating user : %s", err)
 		}
 
+		err = db.Database.Update(repository.Id, repository, db.COLLECTION_REPOSITORY)
+		if err != nil {
+			revel.ERROR.Fatalf("Error while updating repository : %s", err)
+		}
+
 		// fmt.Println(event)
-		break
 	}
 
 	return nil
