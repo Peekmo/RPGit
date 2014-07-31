@@ -38,6 +38,7 @@ type Repository struct {
 	Size         int    `json:"size"`
 	Id           int    `json:"id"`
 	Url          string `json:"url"`
+	Description  string `json:"description"`
 	Owner        string `json:"owner"`
 	Name         string `json:"name"`
 	Wiki         bool   `json:"has_wiki"`
@@ -55,25 +56,28 @@ type Import struct{}
 // Run is the method called by the cronjob
 // It downloads the archive file and update the database
 func (this Import) Run() {
-	// fullPath, err := this.download()
+	// fullPath, err := this.Download("")
 	// if err != nil {
 	// 	revel.ERROR.Fatal(err)
 	// 	return
 	// }
 
-	fullPath := "imports/2014-07-27-1.json.gz"
-	data, err := this.ungzip(fullPath)
-	if err != nil {
-		revel.ERROR.Fatal(err)
-	}
+	// fullPath := "imports/2014-07-27-1.json.gz"
+	// data, err := this.Ungzip(fullPath)
+	// if err != nil {
+	// 	revel.ERROR.Fatal(err)
+	// }
 
-	this.parse(data)
+	// this.Parse(data, true)
 }
 
-// download Downloads the archive file from githubarchive
-func (this *Import) download() (string, error) {
-	date := time.Now().Format("2006-01-02")
-	url := fmt.Sprintf("%s/%s-1.json.gz", revel.Config.StringDefault("imports.url", "http://data.githubarchive.org"), date)
+// Download Downloads the archive file from githubarchive
+func (this *Import) Download(date string) (string, error) {
+	if date == "" {
+		date = time.Now().Format("2006-01-02")
+	}
+
+	url := fmt.Sprintf("%s/%s.json.gz", revel.Config.StringDefault("imports.url", "http://data.githubarchive.org"), date)
 
 	tokens := strings.Split(url, "/")
 	file := tokens[len(tokens)-1]
@@ -114,8 +118,8 @@ func (this *Import) download() (string, error) {
 	return fullPath, nil
 }
 
-// ungzip ungzip the given gzipped file and returns its content
-func (this *Import) ungzip(file string) (string, error) {
+// Ungzip ungzip the given gzipped file and returns its content
+func (this *Import) Ungzip(file string) (string, error) {
 	// Read the file
 	fileReader, err := os.Open(file)
 	if err != nil {
@@ -138,8 +142,8 @@ func (this *Import) ungzip(file string) (string, error) {
 	return str, nil
 }
 
-// parse the given json string and updates the database with it
-func (this *Import) parse(data string) error {
+// Parse the given json string and updates the database with it
+func (this *Import) Parse(data string, ranking bool) error {
 	array := strings.Split(data, "\n")
 	var total int = len(array)
 
@@ -204,33 +208,35 @@ func (this *Import) parse(data string) error {
 		repository.Stars = jsonmap.Repository.Stars
 		repository.Issues = jsonmap.Repository.Issues
 		repository.IsFork = jsonmap.Repository.IsFork
+		repository.Description = jsonmap.Repository.Description
 
 		language := user.GetLanguage(jsonmap.Repository.Language)
 
 		// --------------------------------- UPDATES
+		var xp int
 		switch jsonmap.Type {
 		case "PushEvent":
 			language.Events.Pushes += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					language.Experience += 50 * (key + (key + 1))
+					xp = 50 * (key + (key + 1))
 					break
 				}
 			}
 
 		case "CreateEvent":
-			language.Experience += 1
+			xp = 1
 			language.Events.Creates += 1
 
 		case "DeleteEvent":
-			language.Experience += 1
+			xp = 1
 			language.Events.Deletes += 1
 
 		case "IssuesEvent":
 			language.Events.Issues += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					language.Experience += 5 * (key + (key + 1))
+					xp = 5 * (key + (key + 1))
 					break
 				}
 			}
@@ -239,24 +245,24 @@ func (this *Import) parse(data string) error {
 			language.Events.Comments += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					language.Experience += 1 * (key + (key + 1))
+					xp = 1 * (key + (key + 1))
 					break
 				}
 			}
 
 		case "WatchEvent":
 			language.Events.Stars += 1
-			language.Experience += 1
+			xp = 1
 
 		case "ForkEvent":
 			language.Events.Forks += 1
-			language.Experience += 5
+			xp = 5
 
 		case "PullRequestEvent":
 			language.Events.Pullrequests += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					language.Experience += 300 * (key + (key + 1))
+					xp = 300 * (key + (key + 1))
 					break
 				}
 			}
@@ -265,12 +271,17 @@ func (this *Import) parse(data string) error {
 			language.Events.Comments += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					language.Experience += 1 * (key + (key + 1))
+					xp = 1 * (key + (key + 1))
 					break
 				}
 			}
 		}
 
+		// Updates level & experience
+		language.AddExperience(xp)
+		user.AddExperience(xp)
+
+		// Updates database data
 		err = db.Database.Update(user.Id, user, db.COLLECTION_USER)
 		if err != nil {
 			revel.ERROR.Fatalf("Error while updating user : %s", err)
@@ -280,8 +291,6 @@ func (this *Import) parse(data string) error {
 		if err != nil {
 			revel.ERROR.Fatalf("Error while updating repository : %s", err)
 		}
-
-		// fmt.Println(event)
 	}
 
 	return nil

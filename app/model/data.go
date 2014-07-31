@@ -10,6 +10,8 @@ type User struct {
 	Username      string          `json:"username"`
 	Gravatar      int             `json:"gravatar"`
 	Avatar        string          `json:"avatar"`
+	Level         int             `json:"level"`
+	Experience    int             `json:"experience"`
 	Languages     []*Language     `json:"languages"`
 	Organizations []*Organization `json:"organizations"`
 }
@@ -18,6 +20,7 @@ type Language struct {
 	Id         string  `json:"id"`
 	Name       string  `json:"name"`
 	Events     *Events `json:"events"`
+	Level      int     `json:"level"`
 	Experience int     `json:"experience"`
 }
 
@@ -45,6 +48,7 @@ type Repository struct {
 	Name         string `json:"name"`
 	Size         int    `json:"size"`
 	Url          string `json:"url"`
+	Description  string `json:"description"`
 	Language     string `json:"language"`
 	Owner        string `json:"owner"`
 	Organization string `json:"organization"`
@@ -66,6 +70,13 @@ func NewRepository(id int, name string) *Repository {
 	return &Repository{Id: id, Name: name}
 }
 
+// AddExperience adds experience to the given user
+// It also calculates its current level
+func (this *User) AddExperience(xp int) {
+	this.Experience += xp
+	this.Level = getLevel(this.Experience)
+}
+
 // GetLanguage gets an instance of the given language id
 // It creates it if it does not exists
 func (this *User) GetLanguage(id string) *Language {
@@ -75,8 +86,22 @@ func (this *User) GetLanguage(id string) *Language {
 		}
 	}
 
-	language := &Language{id, id, &Events{}, 0}
+	language := &Language{id, id, &Events{}, 1, 0}
 	this.Languages = append(this.Languages, language)
 
 	return language
+}
+
+// AddExperience adds the given experience to the language
+// It also calculates its current level
+func (this *Language) AddExperience(xp int) {
+	this.Experience += xp
+	this.Level = getLevel(this.Experience)
+}
+
+// ---- Tools
+
+// getLevel returns the level for the given experience
+func getLevel(experience int) int {
+	return (experience / 100) + 1
 }
