@@ -1,8 +1,8 @@
 package crons
 
 import (
-	"RPGithub/app/db"
 	"RPGithub/app/model"
+	"RPGithub/app/services"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -146,6 +146,7 @@ func (this *Import) Ungzip(file string) (string, error) {
 func (this *Import) Parse(data string, ranking bool) error {
 	array := strings.Split(data, "\n")
 	var total int = len(array)
+	var err error
 
 	for key, event := range array {
 		revel.INFO.Printf("-> Event %d/%d", key, total)
@@ -159,29 +160,20 @@ func (this *Import) Parse(data string, ranking bool) error {
 		}
 
 		// ------------------------------------- GET USER
-		var user *model.User
-
-		userData := db.Database.Get(strings.ToLower(jsonmap.User.Login), db.COLLECTION_USER)
-		err := userData.One(&user)
-		if err != nil {
+		user := services.GetUser(strings.ToLower(jsonmap.User.Login))
+		if user == nil {
 			revel.INFO.Printf("Get user %s : %s", jsonmap.User.Login, err)
 
 			// New user
 			user = model.NewUser(jsonmap.User.Login)
 
 			// Register the user
-			err = db.Database.Set(user, db.COLLECTION_USER)
-			if err != nil {
-				revel.ERROR.Fatalf("Error while saving new user : %s", err)
-			}
+			services.RegisterUser(user)
 		}
 
 		// ------------------------------------- GET REPOSITORY
-		var repository *model.Repository
-
-		repositoryData := db.Database.Get(jsonmap.Repository.Id, db.COLLECTION_REPOSITORY)
-		err = repositoryData.One(&repository)
-		if err != nil {
+		repository := services.GetRepository(jsonmap.Repository.Id)
+		if repository == nil {
 			revel.INFO.Printf("Get repository %s : %s", jsonmap.Repository.Id, err)
 
 			// New repository
@@ -191,17 +183,14 @@ func (this *Import) Parse(data string, ranking bool) error {
 			)
 
 			// Register the repository
-			err = db.Database.Set(repository, db.COLLECTION_REPOSITORY)
-			if err != nil {
-				revel.ERROR.Fatalf("Error while saving new repository : %s", err)
-			}
+			services.RegisterRepository(repository)
 		}
 
 		repository.Size = jsonmap.Repository.Size
 		repository.Url = jsonmap.Repository.Url
 		repository.Language = jsonmap.Repository.Language
-		repository.Owner = jsonmap.Repository.Owner
-		repository.Organization = jsonmap.Repository.Organization
+		repository.Owner = strings.ToLower(jsonmap.Repository.Owner)
+		repository.Organization = strings.ToLower(jsonmap.Repository.Organization)
 		repository.Wiki = jsonmap.Repository.Wiki
 		repository.Downloads = jsonmap.Repository.Downloads
 		repository.Forks = jsonmap.Repository.Forks
@@ -282,15 +271,8 @@ func (this *Import) Parse(data string, ranking bool) error {
 		user.AddExperience(xp)
 
 		// Updates database data
-		err = db.Database.Update(user.Id, user, db.COLLECTION_USER)
-		if err != nil {
-			revel.ERROR.Fatalf("Error while updating user : %s", err)
-		}
-
-		err = db.Database.Update(repository.Id, repository, db.COLLECTION_REPOSITORY)
-		if err != nil {
-			revel.ERROR.Fatalf("Error while updating repository : %s", err)
-		}
+		services.UpdateUser(user)
+		services.UpdateRepository(repository)
 	}
 
 	return nil

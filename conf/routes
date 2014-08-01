@@ -6,6 +6,7 @@ module:testrunner
 module:jobs
 
 GET     /api/users/:username                    App.GetUser
+GET     /api/users/:username/repositories       App.GetUserRepositories
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

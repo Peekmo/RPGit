@@ -5,15 +5,14 @@ import (
 )
 
 type User struct {
-	Id            string          `json:"id" bson:"_id"`
-	Name          string          `json:"name"`
-	Username      string          `json:"username"`
-	Gravatar      int             `json:"gravatar"`
-	Avatar        string          `json:"avatar"`
-	Level         int             `json:"level"`
-	Experience    int             `json:"experience"`
-	Languages     []*Language     `json:"languages"`
-	Organizations []*Organization `json:"organizations"`
+	Id         string      `json:"id" bson:"_id"`
+	Name       string      `json:"name"`
+	Username   string      `json:"username"`
+	Gravatar   int         `json:"gravatar"`
+	Avatar     string      `json:"avatar"`
+	Level      int         `json:"level"`
+	Experience int         `json:"experience"`
+	Languages  []*Language `json:"languages"`
 }
 
 type Language struct {
