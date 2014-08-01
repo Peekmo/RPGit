@@ -17,6 +17,7 @@ var (
 // Collections available
 const (
 	COLLECTION_USER         = "User"
+	COLLECTION_EVENT_DAY    = "EventDay"
 	COLLECTION_REPOSITORY   = "Repository"
 	COLLECTION_ORGANIZATION = "Organization"
 )
@@ -44,6 +45,11 @@ func (this *Mongo) GetQuery(query interface{}, collection string) *mgo.Query {
 // UpdateQuery updates documents with the given query
 func (this *Mongo) UpdateQuery(query, data interface{}, collection string) error {
 	return this.db.C(collection).Update(query, data)
+}
+
+// ClearCollection removes all documents from the given collection
+func (this *Mongo) ClearCollection(collection string) (*mgo.ChangeInfo, error) {
+	return this.db.C(collection).RemoveAll(map[string]string{})
 }
 
 // InitDatabse initialize the mongodb session

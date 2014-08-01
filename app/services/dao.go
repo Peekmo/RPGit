@@ -86,3 +86,25 @@ func RegisterUser(user *model.User) error {
 
 	return nil
 }
+
+// RegisterEventDay registers a new event
+func RegisterEventDay(event *model.EventDay) error {
+	err := db.Database.Set(event, db.COLLECTION_EVENT_DAY)
+	if err != nil {
+		revel.ERROR.Fatalf("Error while saving new event : %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
+// ClearEventDay removes all elements from events collection
+func ClearEventDay() error {
+	_, err := db.Database.ClearCollection(db.COLLECTION_EVENT_DAY)
+	if err != nil {
+		revel.ERROR.Fatalf("Error while clearing events collection : %s", err.Error())
+		return err
+	}
+
+	return nil
+}

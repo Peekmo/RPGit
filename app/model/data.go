@@ -59,6 +59,13 @@ type Repository struct {
 	IsFork       bool   `json:"is_fork"`
 }
 
+type EventDay struct {
+	Type       string
+	Language   string
+	User       string
+	Experience int
+}
+
 // NewUser creates a new user
 func NewUser(username string) *User {
 	return &User{Id: strings.ToLower(username), Username: username}
@@ -67,6 +74,11 @@ func NewUser(username string) *User {
 // NewUser creates a new user
 func NewRepository(id int, name string) *Repository {
 	return &Repository{Id: id, Name: name}
+}
+
+// NewEventDay creates a new event day object
+func NewEventDay(typeEvent, language, user string, experience int) *EventDay {
+	return &EventDay{typeEvent, language, strings.ToLower(user), experience}
 }
 
 // AddExperience adds experience to the given user

@@ -62,13 +62,13 @@ func (this Import) Run() {
 	// 	return
 	// }
 
-	// fullPath := "imports/2014-07-27-1.json.gz"
-	// data, err := this.Ungzip(fullPath)
-	// if err != nil {
-	// 	revel.ERROR.Fatal(err)
-	// }
+	fullPath := "imports/2014-07-27-1.json.gz"
+	data, err := this.Ungzip(fullPath)
+	if err != nil {
+		revel.ERROR.Fatal(err)
+	}
 
-	// this.Parse(data, true)
+	this.Parse(data, true)
 }
 
 // Download Downloads the archive file from githubarchive
@@ -148,6 +148,11 @@ func (this *Import) Parse(data string, ranking bool) error {
 	var total int = len(array)
 	var err error
 
+	if ranking == true {
+		// Clear all events
+		services.ClearEventDay()
+	}
+
 	for key, event := range array {
 		revel.INFO.Printf("-> Event %d/%d", key, total)
 
@@ -203,8 +208,8 @@ func (this *Import) Parse(data string, ranking bool) error {
 
 		// --------------------------------- UPDATES
 		var xp int
-		switch jsonmap.Type {
-		case "PushEvent":
+		switch strings.ToLower(jsonmap.Type) {
+		case "pushevent":
 			language.Events.Pushes += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
@@ -213,15 +218,15 @@ func (this *Import) Parse(data string, ranking bool) error {
 				}
 			}
 
-		case "CreateEvent":
+		case "createevent":
 			xp = 1
 			language.Events.Creates += 1
 
-		case "DeleteEvent":
+		case "deleteevent":
 			xp = 1
 			language.Events.Deletes += 1
 
-		case "IssuesEvent":
+		case "issuesevent":
 			language.Events.Issues += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
@@ -230,7 +235,7 @@ func (this *Import) Parse(data string, ranking bool) error {
 				}
 			}
 
-		case "IssueCommentEvent":
+		case "issuecommentevent":
 			language.Events.Comments += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
@@ -239,15 +244,15 @@ func (this *Import) Parse(data string, ranking bool) error {
 				}
 			}
 
-		case "WatchEvent":
+		case "watchevent":
 			language.Events.Stars += 1
 			xp = 1
 
-		case "ForkEvent":
+		case "forkevent":
 			language.Events.Forks += 1
 			xp = 5
 
-		case "PullRequestEvent":
+		case "pullrequestevent":
 			language.Events.Pullrequests += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
@@ -256,7 +261,7 @@ func (this *Import) Parse(data string, ranking bool) error {
 				}
 			}
 
-		case "PullRequestReviewCommentEvent":
+		case "pullrequestreviewcommentevent":
 			language.Events.Comments += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
@@ -264,6 +269,16 @@ func (this *Import) Parse(data string, ranking bool) error {
 					break
 				}
 			}
+		}
+
+		// Register a daily event
+		if ranking == true {
+			services.RegisterEventDay(model.NewEventDay(
+				strings.ToLower(jsonmap.Type),
+				language.Name,
+				user.Id,
+				xp,
+			))
 		}
 
 		// Updates level & experience
