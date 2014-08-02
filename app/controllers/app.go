@@ -33,8 +33,30 @@ func (c App) GetUserRepositories(username string) revel.Result {
 	return c.RenderJson(repositories)
 }
 
+// GetRankingTypeNumber returns number of events by type
 func (c *App) GetRankingTypeNumber(typeEvent string) revel.Result {
 	data, _ := services.RankingEventNumber(typeEvent)
+
+	return c.RenderJson(data)
+}
+
+// GetRankingTypeExperience returns number of experiences points by user
+func (c *App) GetRankingTypeExperience(typeEvent string) revel.Result {
+	data, _ := services.RankingEventExperience(typeEvent)
+
+	return c.RenderJson(data)
+}
+
+// GetRankingTypeNumberLanguage returns number of events by language, by user
+func (c *App) GetRankingTypeNumberLanguage(typeEvent, language string) revel.Result {
+	data, _ := services.RankingEventNumber(typeEvent, language)
+
+	return c.RenderJson(data)
+}
+
+// GetRankingTypeExperienceLanguage returns the number of experiences points by user & language
+func (c *App) GetRankingTypeExperienceLanguage(typeEvent, language string) revel.Result {
+	data, _ := services.RankingEventExperience(typeEvent, language)
 
 	return c.RenderJson(data)
 }

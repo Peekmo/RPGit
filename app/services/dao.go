@@ -122,11 +122,18 @@ func RegisterEventDay(event *model.EventDay) error {
 }
 
 // RankingEventNumber gets from the daily events, the ranking by number of events
-func RankingEventNumber(event string) (MapReduceData, error) {
+func RankingEventNumber(params ...string) (MapReduceData, error) {
 	var result MapReduceData
 
+	var mapfunc string
+	if len(params) == 1 {
+		mapfunc = fmt.Sprintf("function() { if (this.type == '%s') { emit(this.user, 1) } }", params[0])
+	} else {
+		mapfunc = fmt.Sprintf("function() { if (this.type == '%s' && this.language == '%s') { emit(this.user, 1) } }", params[0], params[1])
+	}
+
 	_, err := db.Database.MapReduce(
-		fmt.Sprintf("function() { if (this.type == '%s') { emit(this.user, 1) } }", event),
+		mapfunc,
 		"function (key, values) { return Array.sum(values) }",
 		db.COLLECTION_EVENT_DAY,
 		&result,
@@ -136,6 +143,35 @@ func RankingEventNumber(event string) (MapReduceData, error) {
 
 	if err != nil {
 		revel.ERROR.Fatalf("Error while mapreducing event number : %s", err.Error())
+		return nil, err
+	}
+
+	sort.Sort(result)
+	return result, nil
+}
+
+// RankingEventExperience gets from the daily events, the ranking by experience
+func RankingEventExperience(params ...string) (MapReduceData, error) {
+	var result MapReduceData
+
+	var mapfunc string
+	if len(params) == 1 {
+		mapfunc = fmt.Sprintf("function() { if (this.type == '%s') { emit(this.user, this.experience) } }", params[0])
+	} else {
+		mapfunc = fmt.Sprintf("function() { if (this.type == '%s' && this.language == '%s') { emit(this.user, this.experience) } }", params[0], params[1])
+	}
+
+	_, err := db.Database.MapReduce(
+		mapfunc,
+		"function (key, values) { return Array.sum(values) }",
+		db.COLLECTION_EVENT_DAY,
+		&result,
+	)
+
+	fmt.Println(len(result))
+
+	if err != nil {
+		revel.ERROR.Fatalf("Error while mapreducing event experience : %s", err.Error())
 		return nil, err
 	}
 
