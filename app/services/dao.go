@@ -3,9 +3,32 @@ package services
 import (
 	"RPGithub/app/db"
 	"RPGithub/app/model"
+	"fmt"
 	"github.com/revel/revel"
+	"sort"
 	"strings"
 )
+
+// Map reduce data (implements sort.Interface)
+type MapReduceData []struct {
+	Key   string `json:"key" bson:"_id"`
+	Value int    `json:"value"`
+}
+
+// Len returns MapReduceData length
+func (m MapReduceData) Len() int {
+	return len(m)
+}
+
+// Swap swaps 2 values from MapReduceData
+func (m MapReduceData) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
+}
+
+// Less checks if the first value is greater than the second
+func (m MapReduceData) Less(i, j int) bool {
+	return m[i].Value > m[j].Value
+}
 
 // GetUser gets a user from the database
 func GetUser(username string) *model.User {
@@ -96,6 +119,28 @@ func RegisterEventDay(event *model.EventDay) error {
 	}
 
 	return nil
+}
+
+// RankingEventNumber gets from the daily events, the ranking by number of events
+func RankingEventNumber(event string) (MapReduceData, error) {
+	var result MapReduceData
+
+	_, err := db.Database.MapReduce(
+		fmt.Sprintf("function() { if (this.type == '%s') { emit(this.user, 1) } }", event),
+		"function (key, values) { return Array.sum(values) }",
+		db.COLLECTION_EVENT_DAY,
+		&result,
+	)
+
+	fmt.Println(len(result))
+
+	if err != nil {
+		revel.ERROR.Fatalf("Error while mapreducing event number : %s", err.Error())
+		return nil, err
+	}
+
+	sort.Sort(result)
+	return result, nil
 }
 
 // ClearEventDay removes all elements from events collection

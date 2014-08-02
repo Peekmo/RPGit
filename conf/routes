@@ -7,6 +7,7 @@ module:jobs
 
 GET     /api/users/:username                    App.GetUser
 GET     /api/users/:username/repositories       App.GetUserRepositories
+GET     /api/ranking/:typeEvent/number          App.GetRankingTypeNumber
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

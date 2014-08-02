@@ -52,6 +52,16 @@ func (this *Mongo) ClearCollection(collection string) (*mgo.ChangeInfo, error) {
 	return this.db.C(collection).RemoveAll(map[string]string{})
 }
 
+// MapReduce executes the given map reduce function
+func (this *Mongo) MapReduce(mapfunc, reduce, collection string, result interface{}) (*mgo.MapReduceInfo, error) {
+	job := &mgo.MapReduce{
+		Map:    mapfunc,
+		Reduce: reduce,
+	}
+
+	return this.db.C(collection).Find(nil).MapReduce(job, result)
+}
+
 // InitDatabse initialize the mongodb session
 func InitDatabase() {
 	var url string

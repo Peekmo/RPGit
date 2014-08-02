@@ -62,13 +62,13 @@ func (this Import) Run() {
 	// 	return
 	// }
 
-	fullPath := "imports/2014-07-27-1.json.gz"
-	data, err := this.Ungzip(fullPath)
-	if err != nil {
-		revel.ERROR.Fatal(err)
-	}
+	// fullPath := "imports/2014-07-27-1.json.gz"
+	// data, err := this.Ungzip(fullPath)
+	// if err != nil {
+	// 	revel.ERROR.Fatal(err)
+	// }
 
-	this.Parse(data, true)
+	// this.Parse(data, true)
 }
 
 // Download Downloads the archive file from githubarchive

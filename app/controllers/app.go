@@ -32,3 +32,9 @@ func (c App) GetUserRepositories(username string) revel.Result {
 	c.Response.Out.Header().Add("Cache-Control", "max-age=100000, public")
 	return c.RenderJson(repositories)
 }
+
+func (c *App) GetRankingTypeNumber(typeEvent string) revel.Result {
+	data, _ := services.RankingEventNumber(typeEvent)
+
+	return c.RenderJson(data)
+}
