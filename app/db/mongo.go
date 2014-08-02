@@ -17,6 +17,7 @@ var (
 // Collections available
 const (
 	COLLECTION_USER         = "User"
+	COLLECTION_BLACKLIST    = "Blacklist"
 	COLLECTION_EVENT_DAY    = "EventDay"
 	COLLECTION_REPOSITORY   = "Repository"
 	COLLECTION_ORGANIZATION = "Organization"

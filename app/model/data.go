@@ -66,6 +66,11 @@ type EventDay struct {
 	Experience int
 }
 
+type Blacklist struct {
+	Name   string `json:"name" bson:"_id"`
+	Reason string `json:"reason"`
+}
+
 // NewUser creates a new user
 func NewUser(username string) *User {
 	return &User{Id: strings.ToLower(username), Username: username}
@@ -79,6 +84,11 @@ func NewRepository(id int, name string) *Repository {
 // NewEventDay creates a new event day object
 func NewEventDay(typeEvent, language, user string, experience int) *EventDay {
 	return &EventDay{typeEvent, language, strings.ToLower(user), experience}
+}
+
+// NewBlacklist creates a new blacklist
+func NewBlacklist(name, reason string) *Blacklist {
+	return &Blacklist{name, reason}
 }
 
 // AddExperience adds experience to the given user

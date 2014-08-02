@@ -43,6 +43,19 @@ func GetUser(username string) *model.User {
 	return user
 }
 
+// IsBlacklisted checks if the given user is blacklisted or not
+func IsBlacklisted(name string) bool {
+	var blacklist *model.Blacklist
+
+	blacklistData := db.Database.Get(strings.ToLower(name), db.COLLECTION_BLACKLIST)
+	err := blacklistData.One(&blacklist)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
 // GetRepository gets a new repository from the database
 func GetRepository(id int) *model.Repository {
 	var repository *model.Repository
@@ -121,6 +134,17 @@ func RegisterEventDay(event *model.EventDay) error {
 	return nil
 }
 
+// RegisterEventDay registers a new blacklist
+func RegisterBlacklist(blacklist *model.Blacklist) error {
+	err := db.Database.Set(blacklist, db.COLLECTION_BLACKLIST)
+	if err != nil {
+		revel.ERROR.Fatalf("Error while saving new blacklist : %s", err.Error())
+		return err
+	}
+
+	return nil
+}
+
 // RankingEventNumber gets from the daily events, the ranking by number of events
 func RankingEventNumber(params ...string) (MapReduceData, error) {
 	var result MapReduceData
@@ -147,6 +171,20 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 	}
 
 	sort.Sort(result)
+
+	// Checks for limit of events per day (to remove bots)
+	index := 0
+	for key, value := range result {
+		if value.Value < revel.Config.IntDefault("blacklist.limit", 200) {
+			index = key
+			break
+		} else {
+			RegisterBlacklist(model.NewBlacklist(value.Key, fmt.Sprintf("Number of events too big (%d)", value.Value)))
+		}
+	}
+
+	result = result[index:len(result)]
+
 	return result, nil
 }
 

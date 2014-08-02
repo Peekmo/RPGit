@@ -176,6 +176,11 @@ func (this *Import) Parse(data string, ranking bool) error {
 			services.RegisterUser(user)
 		}
 
+		// Checks is the user is blacklisted
+		if services.IsBlacklisted(user.Id) {
+			continue
+		}
+
 		// ------------------------------------- GET REPOSITORY
 		repository := services.GetRepository(jsonmap.Repository.Id)
 		if repository == nil {
