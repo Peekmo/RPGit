@@ -83,7 +83,7 @@ func GetUserRepositories(username string) []*model.Repository {
 func UpdateUser(user *model.User) error {
 	err := db.Database.Update(user.Id, user, db.COLLECTION_USER)
 	if err != nil {
-		revel.ERROR.Fatalf("Error while updating data : %s", err.Error())
+		revel.ERROR.Printf("Error while updating data : %s", err.Error())
 		return err
 	}
 
@@ -94,7 +94,7 @@ func UpdateUser(user *model.User) error {
 func UpdateRepository(repository *model.Repository) error {
 	err := db.Database.Update(repository.Id, repository, db.COLLECTION_REPOSITORY)
 	if err != nil {
-		revel.ERROR.Fatalf("Error while updating data : %s", err.Error())
+		revel.ERROR.Printf("Error while updating data : %s", err.Error())
 		return err
 	}
 
@@ -105,7 +105,7 @@ func UpdateRepository(repository *model.Repository) error {
 func RegisterRepository(repository *model.Repository) error {
 	err := db.Database.Set(repository, db.COLLECTION_REPOSITORY)
 	if err != nil {
-		revel.ERROR.Fatalf("Error while saving new repository : %s", err.Error())
+		revel.ERROR.Printf("Error while saving new repository : %s", err.Error())
 		return err
 	}
 
@@ -116,7 +116,7 @@ func RegisterRepository(repository *model.Repository) error {
 func RegisterUser(user *model.User) error {
 	err := db.Database.Set(user, db.COLLECTION_USER)
 	if err != nil {
-		revel.ERROR.Fatalf("Error while saving new user : %s", err.Error())
+		revel.ERROR.Printf("Error while saving new user : %s", err.Error())
 		return err
 	}
 
@@ -127,7 +127,7 @@ func RegisterUser(user *model.User) error {
 func RegisterEventDay(event *model.EventDay) error {
 	err := db.Database.Set(event, db.COLLECTION_EVENT_DAY)
 	if err != nil {
-		revel.ERROR.Fatalf("Error while saving new event : %s", err.Error())
+		revel.ERROR.Printf("Error while saving new event : %s", err.Error())
 		return err
 	}
 
@@ -138,7 +138,7 @@ func RegisterEventDay(event *model.EventDay) error {
 func RegisterBlacklist(blacklist *model.Blacklist) error {
 	err := db.Database.Set(blacklist, db.COLLECTION_BLACKLIST)
 	if err != nil {
-		revel.ERROR.Fatalf("Error while saving new blacklist : %s", err.Error())
+		revel.ERROR.Printf("Error while saving new blacklist : %s", err.Error())
 		return err
 	}
 
@@ -166,7 +166,7 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 	fmt.Println(len(result))
 
 	if err != nil {
-		revel.ERROR.Fatalf("Error while mapreducing event number : %s", err.Error())
+		revel.ERROR.Printf("Error while mapreducing event number : %s", err.Error())
 		return nil, err
 	}
 
@@ -180,6 +180,7 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 			break
 		} else {
 			RegisterBlacklist(model.NewBlacklist(value.Key, fmt.Sprintf("Number of events too big (%d)", value.Value)))
+			db.Database.Remove(map[string]string{"user": value.Key}, db.COLLECTION_EVENT_DAY)
 		}
 	}
 
@@ -209,7 +210,7 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 	fmt.Println(len(result))
 
 	if err != nil {
-		revel.ERROR.Fatalf("Error while mapreducing event experience : %s", err.Error())
+		revel.ERROR.Printf("Error while mapreducing event experience : %s", err.Error())
 		return nil, err
 	}
 
@@ -221,7 +222,7 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 func ClearEventDay() error {
 	_, err := db.Database.ClearCollection(db.COLLECTION_EVENT_DAY)
 	if err != nil {
-		revel.ERROR.Fatalf("Error while clearing events collection : %s", err.Error())
+		revel.ERROR.Printf("Error while clearing events collection : %s", err.Error())
 		return err
 	}
 

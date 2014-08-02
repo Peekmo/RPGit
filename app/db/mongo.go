@@ -53,6 +53,11 @@ func (this *Mongo) ClearCollection(collection string) (*mgo.ChangeInfo, error) {
 	return this.db.C(collection).RemoveAll(map[string]string{})
 }
 
+// Remove removes elements from the given collection following the query
+func (this *Mongo) Remove(query interface{}, collection string) (*mgo.ChangeInfo, error) {
+	return this.db.C(collection).RemoveAll(query)
+}
+
 // MapReduce executes the given map reduce function
 func (this *Mongo) MapReduce(mapfunc, reduce, collection string, result interface{}) (*mgo.MapReduceInfo, error) {
 	job := &mgo.MapReduce{
