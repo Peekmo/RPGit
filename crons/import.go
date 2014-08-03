@@ -16,6 +16,7 @@ import (
 )
 
 type ImportedData struct {
+	Created    string          `json:"created_at"`
 	Type       string          `json:"type"`
 	User       ActorAttributes `json:"actor_attributes"`
 	Repository Repository      `json:"repository"`
@@ -56,27 +57,29 @@ type Import struct{}
 // Run is the method called by the cronjob
 // It downloads the archive file and update the database
 func (this Import) Run() {
-	// fullPath, err := this.Download("")
-	// if err != nil {
-	// 	revel.ERROR.Fatal(err)
-	// 	return
-	// }
+	date := time.Now().Add(-time.Duration(24) * time.Hour).Format("2006-01-02")
 
-	// fullPath := "imports/2014-07-27-1.json.gz"
-	// data, err := this.Ungzip(fullPath)
-	// if err != nil {
-	// 	revel.ERROR.Fatal(err)
-	// }
+	// Clear all events
+	services.ClearEventDay()
 
-	// this.Parse(data, true)
+	for i := 0; i < 24; i++ {
+		fullPath, err := this.Download(fmt.Sprintf("%s-%d", date, i))
+		if err != nil {
+			revel.ERROR.Println(err.Error())
+			return
+		}
+
+		data, err := this.Ungzip(fullPath)
+		if err != nil {
+			revel.ERROR.Println(err.Error())
+		}
+
+		this.Parse(data, true)
+	}
 }
 
 // Download Downloads the archive file from githubarchive
 func (this *Import) Download(date string) (string, error) {
-	if date == "" {
-		date = time.Now().Format("2006-01-02")
-	}
-
 	url := fmt.Sprintf("%s/%s.json.gz", revel.Config.StringDefault("imports.url", "http://data.githubarchive.org"), date)
 
 	tokens := strings.Split(url, "/")
@@ -114,7 +117,7 @@ func (this *Import) Download(date string) (string, error) {
 		return fullPath, err
 	}
 
-	revel.INFO.Printf("File's downloading done (%s bytes)", bytes)
+	revel.INFO.Printf("File's downloading done (%d bytes)", bytes)
 	return fullPath, nil
 }
 
@@ -143,15 +146,9 @@ func (this *Import) Ungzip(file string) (string, error) {
 }
 
 // Parse the given json string and updates the database with it
-func (this *Import) Parse(data string, ranking bool) error {
+func (this *Import) Parse(data string, ranking bool) {
 	array := strings.Split(data, "\n")
 	var total int = len(array)
-	var err error
-
-	if ranking == true {
-		// Clear all events
-		services.ClearEventDay()
-	}
 
 	for key, event := range array {
 		revel.INFO.Printf("-> Event %d/%d", key, total)
@@ -167,8 +164,6 @@ func (this *Import) Parse(data string, ranking bool) error {
 		// ------------------------------------- GET USER
 		user := services.GetUser(strings.ToLower(jsonmap.User.Login))
 		if user == nil {
-			revel.INFO.Printf("Get user %s : %s", jsonmap.User.Login, err)
-
 			// New user
 			user = model.NewUser(jsonmap.User.Login)
 
@@ -184,8 +179,6 @@ func (this *Import) Parse(data string, ranking bool) error {
 		// ------------------------------------- GET REPOSITORY
 		repository := services.GetRepository(jsonmap.Repository.Id)
 		if repository == nil {
-			revel.INFO.Printf("Get repository %s : %s", jsonmap.Repository.Id, err)
-
 			// New repository
 			repository = model.NewRepository(
 				jsonmap.Repository.Id,
@@ -283,6 +276,8 @@ func (this *Import) Parse(data string, ranking bool) error {
 				language.Name,
 				user.Id,
 				xp,
+				jsonmap.Repository.Id,
+				jsonmap.Created,
 			))
 		}
 
@@ -294,6 +289,4 @@ func (this *Import) Parse(data string, ranking bool) error {
 		services.UpdateUser(user)
 		services.UpdateRepository(repository)
 	}
-
-	return nil
 }

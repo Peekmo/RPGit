@@ -64,6 +64,8 @@ type EventDay struct {
 	Language   string
 	User       string
 	Experience int
+	Repository int
+	Date       string
 }
 
 type Blacklist struct {
@@ -82,8 +84,8 @@ func NewRepository(id int, name string) *Repository {
 }
 
 // NewEventDay creates a new event day object
-func NewEventDay(typeEvent, language, user string, experience int) *EventDay {
-	return &EventDay{typeEvent, language, strings.ToLower(user), experience}
+func NewEventDay(typeEvent, language, user string, experience, repository int, date string) *EventDay {
+	return &EventDay{typeEvent, language, strings.ToLower(user), experience, repository, date}
 }
 
 // NewBlacklist creates a new blacklist
