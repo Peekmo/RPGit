@@ -173,18 +173,20 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 	sort.Sort(result)
 
 	// Checks for limit of events per day (to remove bots)
-	index := 0
-	for key, value := range result {
-		if value.Value < revel.Config.IntDefault("blacklist.limit", 200) {
-			index = key
-			break
-		} else {
-			RegisterBlacklist(model.NewBlacklist(value.Key, fmt.Sprintf("Number of events too big (%d)", value.Value)))
-			db.Database.Remove(map[string]string{"user": value.Key}, db.COLLECTION_EVENT_DAY)
+	if params[0] == "pushevent" {
+		index := 0
+		for key, value := range result {
+			if value.Value < revel.Config.IntDefault("blacklist.limit", 200) {
+				index = key
+				break
+			} else {
+				RegisterBlacklist(model.NewBlacklist(value.Key, fmt.Sprintf("Number of events too big (%d)", value.Value)))
+				db.Database.Remove(map[string]string{"user": value.Key}, db.COLLECTION_EVENT_DAY)
+			}
 		}
-	}
 
-	result = result[index:len(result)]
+		result = result[index:len(result)]
+	}
 
 	return result, nil
 }

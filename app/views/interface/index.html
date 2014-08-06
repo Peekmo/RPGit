@@ -1,5 +1,5 @@
-{{ set . "title" "Home" }}
-{{ template "header.html" .}}
+@{ set . "title" "Home" }@
+@{ template "header.html" .}@
 
 <section class="container">
 	<article class="row">
@@ -14,11 +14,8 @@
 
 			<div class="tab-content">
 				<div class="tab-pane active container-fluid" id="daily">
-					<article class="row">
-						<div class="col-md-6 col-xs-6 col-sm-6 text-center">ss</div>
-						<div class="col-md-6 col-xs-6 col-sm-6 text-center">dd</div>
-						<div class="col-md-6 col-xs-6 col-sm-6 text-center">aa</div>
-						<div class="col-md-6 col-xs-6 col-sm-6 text-center">gg</div>
+					<article class="row" id="ranking-daily">
+
 					</article>
 				</div>
 				<div class="tab-pane" id="global">
@@ -32,4 +29,10 @@
 	</article>
 </section>
 
-{{ template "footer.html" .}}
+<script id="overview-ranking" type="text/x-handlebars-template">
+	{{#each this}}
+		<div class="col-md-4 col-xs-4 col-sm-6 text-center">{{name}}</div>
+	{{/each}}
+</script>
+
+@{ template "footer.html" .}@

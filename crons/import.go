@@ -151,10 +151,14 @@ func (this *Import) Parse(data string, ranking bool) {
 	var total int = len(array)
 
 	for key, event := range array {
-		revel.INFO.Printf("-> Event %d/%d", key, total)
+		revel.INFO.Printf("-> Event %d/%d", (key + 1), total)
 
 		var jsonmap ImportedData
 		_ = json.Unmarshal([]byte(event), &jsonmap)
+
+		if jsonmap.Repository.Language == "" {
+			jsonmap.Repository.Language = "Unknown"
+		}
 
 		// Only user type for moment
 		if jsonmap.User.Type != "User" {

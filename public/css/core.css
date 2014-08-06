@@ -45,3 +45,8 @@ body {
 .btn-size-header {
 	width: 125px;
 }
+
+.fork {
+	padding-top: 2px;
+	float: right;
+}
