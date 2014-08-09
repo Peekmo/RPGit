@@ -17,16 +17,6 @@ jQuery(function($) {
 		},
 
 		render: function() {
-			var test = [
-				{
-					name: "Salut"
-				},
-				{
-					name: "Test"
-				}
-			];
-
-			console.log(this.dailyTpl(test));
 			this.$daily.html(this.dailyTpl(test));
 		}
 	};
