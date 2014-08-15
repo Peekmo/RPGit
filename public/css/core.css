@@ -6,30 +6,7 @@ body {
 	box-shadow: 0 0 12px #202020;
 }
 
-.nav-pills {
-	text-align: center;
-}
-
-.nav-pills a {
-	color: #FF7D49;
-}
-
-.nav-pills>li>a {
-	background-color: #1A1A1A;
-}
-
-.tab-content {
-	margin-top: 30px;
-}
-
-.nav-pills>li.active>a,
-.nav-pills>li.active>a:hover,
-.nav-pills>li.active>a:focus  {
-	background-color: #FF7D49;
-}
-
-.highlight {
-	padding: 15px;
+.rp-container {
 	margin-bottom: 14px;
 	background-color: #202020;
 	border: 1px solid #000000;
@@ -38,15 +15,90 @@ body {
 	color: #FFFFFF;
 }
 
-.text-center {
+.ui .first-container {
+	padding: 0px !important;
+}
+
+.ui .columns-container {
+	padding: 10px;
+}
+
+.ui.inverted.menu.nav-menu {
+	padding: 0px;
+	border-radius: 10px;
+	background-color: #1A1A1A;
+}
+
+.ui.menu .item.nav {
+	background-color: #1A1A1A;
+	border-radius: 10px;
+	font-weight: bold;
+}
+
+.ui.menu .item.active.nav,
+.ui.inverted.pointing.menu .active.item.nav:after {
+	background-color: #FF7D49;
+}
+
+.ui.inverted.pointing.menu .item.nav.active:hover:after {
+	background-color: #FFFFFF;
+}
+
+.ui.inverted.menu .item.nav:hover {
+	background-color: #FFFFFF;
+	color: #FF7D49 !important;
+}
+
+.avatar-preview {
+	width: 100px;
+	height: 100px;
+	border: 1px solid #000000;
+	box-shadow: 0 0 12px #202020;
+	top: 40px;
+	margin: auto;
+	position: absolute;
+}
+
+.profile-container {
+	padding: 5px;
+	padding-top: 45px;
+	margin: auto;
+	width: 300px;
+	background-color: #FF7D49;
+	border-radius: 15px;
 	text-align: center;
+	margin-bottom: 30px;
 }
 
-.btn-size-header {
-	width: 125px;
+.label.profile,
+.progress.profile {
+	width: 100%;
+	margin: 0;
+	margin-top: 4px;
 }
 
-.fork {
-	padding-top: 2px;
-	float: right;
+.progress.profile {
+	text-align: left;
+	border: 1px;
+}
+
+.profile-labels {
+	padding-left: 10px;
+	padding-right: 10px;	
+}
+
+.profile-header {
+	text-align: center;
+	padding-left: 30px;
+	padding-right: 30px;
+}
+
+@media only screen and (max-width: 600px) {
+	.profile-container {
+		width: 200px;
+	}
+}
+
+.text-center {
+	text-align: center !important;
 }

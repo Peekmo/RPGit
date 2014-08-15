@@ -1,0 +1,46 @@
+@{ set . "title" .user.Username }@
+@{ template "header.html" .}@
+
+<div class="ui column page grid">
+	<div class="two wide column"></div>
+	<div class="twelve wide column">
+		@{ if .user.Avatar }@
+		<img class="ui circular image avatar-preview" src="@{ .user.Avatar }@"/>
+		@{ else }@
+		<img class="ui circular image avatar-preview" src="../public/img/default-avatar.png"/>
+		@{ end }@
+
+		<div class="ui rp-container first-container">
+			<div class="profile-container">
+				<div class="profile-labels">
+					<a class="ui purple label profile" target="_blank" href="http://github.com/@{.user.Username}@"><i class="circular icon github"></i>@{ .user.Username }@</a>
+					<a class="ui purple label profile"><i class="circular icon tint"></i> Level <strong>@{ .user.Level }@</strong></a>
+					<div class="ui blue progress profile">
+						<div class="bar" style="width: 30%;"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="two column stackable ui grid">
+				<div class="column">
+					<div class="profile-header">
+						<h4>
+							<i class="circular icon code"></i> Programming languages
+							<hr>
+						</h4>
+					</div>	
+				</div>
+				<div class="column">
+					<div class="profile-header">
+						<h4>
+							<i class="circular icon list layout"></i> Active repositories
+							<hr>
+						</h4>
+					</div>	
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@{ template "footer.html" .}@

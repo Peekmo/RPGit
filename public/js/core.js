@@ -1,9 +1,9 @@
 jQuery(function($) {
-	$('.tab-ranking a').click(function (e) {
-	  e.preventDefault()
-	  $(this).tab('show')
-	});
-
+	$('.nav-menu .item')
+		.tab()
+		.tab('activate tab', 'first')
+		.tab('activate navigation', 'first')
+	;
 
 	var Home = {
 		init: function() {

@@ -1,20 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<title>Not found</title>
-	</head>
-	<body>
-{{if eq .RunMode "dev"}}
-{{template "errors/404-dev.html" .}}
-{{else}}
-	{{with .Error}}
+@{ set . "title" "Not found" }@
+@{ template "header.html" .}@
+
+@{ if eq .RunMode "dev" }@
+@{ template "errors/404-dev.html" . }@
+@{ else }@
+	@{ with .Error }@
 	<h1>
-		{{.Title}}
+		@{ .Title }@
 	</h1>
 	<p>
-		{{.Description}}
+		@{ .Description }@
 	</p>
-	{{end}}
-{{end}}
+	@{ end }@
+@{ end }@
 	</body>
 </html>
+
+@{ template "footer.html" .}@

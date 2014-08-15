@@ -15,6 +15,7 @@ GET     /api/ranking/:typeEvent/experience/:language        App.GetRankingTypeEx
 
 # ------------------------------- INTERFACES --------------------------------------
 GET     /                									Interface.Index
+GET     /users/:username   									Interface.User
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

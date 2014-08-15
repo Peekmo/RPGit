@@ -6,13 +6,14 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
-	"github.com/revel/revel"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/revel/revel"
 )
 
 type ImportedData struct {
@@ -24,8 +25,10 @@ type ImportedData struct {
 }
 
 type ActorAttributes struct {
-	Login string `json:"login"`
-	Type  string `json:"type"`
+	Login      string `json:"login"`
+	Type       string `json:"type"`
+	GravatarId string `json:"gravatar_id"`
+	Name       string `json:"name"`
 }
 
 type Payload struct {
@@ -174,6 +177,9 @@ func (this *Import) Parse(data string, ranking bool) {
 			// Register the user
 			services.RegisterUser(user)
 		}
+
+		user.Avatar = fmt.Sprintf("http://gravatar.com/avatar/%s", jsonmap.User.GravatarId)
+		user.Name = jsonmap.User.Name
 
 		// Checks is the user is blacklisted
 		if services.IsBlacklisted(user.Id) {
