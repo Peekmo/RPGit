@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"RPGithub/app/model"
 	"RPGithub/app/services"
+	"sort"
 
 	"github.com/revel/revel"
 )
@@ -23,5 +25,10 @@ func (c Interface) User(username string) revel.Result {
 		return c.NotFound("User not found")
 	}
 
-	return c.Render(user)
+	repositories := services.GetUserRepositories(username)
+
+	sort.Sort(sort.Reverse(model.LanguageArray(user.Languages)))
+	sort.Sort(sort.Reverse(model.RepositoryArray(repositories)))
+
+	return c.Render(user, repositories)
 }

@@ -13,8 +13,8 @@
 		<div class="ui rp-container first-container">
 			<div class="profile-container">
 				<div class="profile-labels">
-					<a class="ui purple label profile" target="_blank" href="http://github.com/@{.user.Username}@"><i class="circular icon github"></i>@{ .user.Username }@</a>
-					<a class="ui purple label profile"><i class="circular icon tint"></i> Level <strong>@{ .user.Level }@</strong></a>
+					<div class="ui purple label profile"><i class="circular icon github"></i><a target="_blank" href="http://github.com/@{.user.Username}@">@{ .user.Username }@</a></div>
+					<div class="ui purple label profile"><i class="circular icon tint"></i> Level <strong>@{ .user.Level }@</strong></div>
 					<div class="ui blue progress profile">
 						<div class="bar" style="width: 30%;"></div>
 					</div>
@@ -68,6 +68,34 @@
 							<i class="circular icon list layout"></i> Active repositories
 							<hr>
 						</h4>
+
+						@{ if .repositories }@
+							@{ range .repositories }@
+							<div class="ui rp-item">
+								<div class="ui purple label profile"><i class="icon circular info"></i><a href="@{ .Url }@" target="_blank">@{ .Name }@ </a>@{ if .IsFork }@ (fork) @{ end }@</div>
+								<div class="floating ui red label rp-floating-item">@{ .Language }@</div>
+								<p>@{ .Description }@</p>
+
+								<div class="ui divided selection list">
+									<a class="item">
+										<div class="ui @{ invertColorLanguage .Issues 1 10 }@ horizontal label">@{ .Issues }@</div> Issues opened
+									</a>
+									<a class="item">
+										<div class="ui @{ colorLanguage .Forks 5 20 }@ horizontal label">@{ .Forks }@</div> Forks
+									</a>
+									<a class="item">
+										<div class="ui @{ colorLanguage .Stars 10 50 }@ horizontal label">@{ .Stars }@</div> Stars
+									</a>
+									<a class="item">
+										<div class="ui @{ if .Wiki }@ green @{ else }@ red @{ end }@ horizontal label">@{ if .Wiki }@ Yes @{ else }@ No @{ end }@</div> Wiki
+									</a>
+								</div>
+
+							</div>	
+							@{ end }@
+						@{ else }@
+						No active repository found
+						@{ end }@
 					</div>	
 				</div>
 			</div>

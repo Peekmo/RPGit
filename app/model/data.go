@@ -127,3 +127,37 @@ func (this *Language) AddExperience(xp int) {
 func getLevel(experience int) int {
 	return (experience / 100) + 1
 }
+
+// ----- Sorts
+type LanguageArray []*Language
+type RepositoryArray []*Repository
+
+// Len returns array's length
+func (this LanguageArray) Len() int {
+	return len(this)
+}
+
+// Swap changes array's elements
+func (this LanguageArray) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
+
+// Less returns if the given language as more or less experience than the other
+func (this LanguageArray) Less(i, j int) bool {
+	return this[i].Experience < this[j].Experience
+}
+
+// Len returns array's length
+func (this RepositoryArray) Len() int {
+	return len(this)
+}
+
+// Swap changes array's elements
+func (this RepositoryArray) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
+
+// Less returns if the given repository as more or less stars than the other
+func (this RepositoryArray) Less(i, j int) bool {
+	return this[i].Stars < this[j].Stars
+}

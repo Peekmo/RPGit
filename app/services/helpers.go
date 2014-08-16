@@ -9,9 +9,10 @@ import (
 // RegisterHelpers is a public which registers all template helpers
 func RegisterHelpers() {
 	revel.TemplateFuncs["colorLanguage"] = ColorLanguages
+	revel.TemplateFuncs["invertColorLanguage"] = InvertColorLanguages
 }
 
-// colorLanguages prints the color of the event number label in user profile
+// ColorLanguages prints the color of the event number label in user profile
 func ColorLanguages(current, teal, green int) template.HTML {
 	if current >= green {
 		return template.HTML("green")
@@ -19,5 +20,16 @@ func ColorLanguages(current, teal, green int) template.HTML {
 		return template.HTML("teal")
 	} else {
 		return template.HTML("red")
+	}
+}
+
+// InvertColorLanguages prints the color of the event number label in user profile
+func InvertColorLanguages(current, teal, red int) template.HTML {
+	if current >= red {
+		return template.HTML("red")
+	} else if current >= teal {
+		return template.HTML("teal")
+	} else {
+		return template.HTML("green")
 	}
 }
