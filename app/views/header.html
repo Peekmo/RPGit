@@ -9,6 +9,29 @@
     <link rel="shortcut icon" type="image/png" href="/public/img/favicon.png">
 </head>
 <body>
+	
+<div class="ui styled sidebar invert active">
+	<h3 class="ui header"><i class="icon circular user"></i>Search</h3>
+	<div class="ui form">
+		<div class="ui icon input">
+			<i class="icon search btn" id="search-btn"></i>
+			<input type="text" name="search" id="search-field"/>
+		</div>
+	</div>
+
+	@{ if .languages }@
+	<h3 class="ui header"><i class="icon circular filter inline"></i>Filter <a class="ui red label reset" onclick="reset()" id="reset">Reset</a></h3>
+	<div class="text-center">@{ .unit }@</div>
+	<div class="ui fluid vertical menu">
+		@{ range .languages }@
+		<a class="item" onclick="filter(@{ .Key }@)">
+			<div class="ui label">@{ .Value }@</div>
+			@{ .Key }@
+		</a>
+		@{ end }@
+	</div>		
+	@{ end }@
+</div>
 
     <!-- <nav class="navbar navbar-default navbar-static-top navbar-inverse navbar-core" role="navigation">
         <div class="container">

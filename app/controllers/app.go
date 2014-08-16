@@ -3,6 +3,7 @@ package controllers
 import (
 	"RPGithub/api"
 	"RPGithub/app/services"
+
 	"github.com/revel/revel"
 )
 
@@ -57,6 +58,13 @@ func (c *App) GetRankingTypeNumberLanguage(typeEvent, language string) revel.Res
 // GetRankingTypeExperienceLanguage returns the number of experiences points by user & language
 func (c *App) GetRankingTypeExperienceLanguage(typeEvent, language string) revel.Result {
 	data, _ := services.RankingEventExperience(typeEvent, language)
+
+	return c.RenderJson(data)
+}
+
+// GetAllLanguages returns all languages with their number of events
+func (c *App) GetAllLanguages() revel.Result {
+	data, _ := services.GetAllLanguages()
 
 	return c.RenderJson(data)
 }

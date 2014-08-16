@@ -8,6 +8,7 @@ module:jobs
 # ----------------------------------- API -----------------------------------------
 GET     /api/users/:username                                App.GetUser
 GET     /api/users/:username/repositories                   App.GetUserRepositories
+GET     /api/languages										App.GetAllLanguages
 GET     /api/ranking/:typeEvent/number                      App.GetRankingTypeNumber
 GET     /api/ranking/:typeEvent/number/:language            App.GetRankingTypeNumberLanguage
 GET     /api/ranking/:typeEvent/experience                  App.GetRankingTypeExperience

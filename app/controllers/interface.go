@@ -13,9 +13,26 @@ type Interface struct {
 	*revel.Controller
 }
 
+// Language is a language structure for the menu
+type Language struct {
+	Key   string
+	Value int
+}
+
 // Index renders the home page
 func (c Interface) Index() revel.Result {
-	return c.Render()
+	languages, _ := services.GetAllLanguages()
+
+	var total int
+	for _, value := range languages {
+		total += value.Value
+	}
+
+	for key, value := range languages {
+		languages[key].Value = (value.Value * 1000000) / total
+	}
+
+	return c.Render(languages)
 }
 
 // User renders user profile
@@ -30,5 +47,10 @@ func (c Interface) User(username string) revel.Result {
 	sort.Sort(sort.Reverse(model.LanguageArray(user.Languages)))
 	sort.Sort(sort.Reverse(model.RepositoryArray(repositories)))
 
-	return c.Render(user, repositories)
+	var languages []*Language
+	for _, language := range user.Languages {
+		languages = append(languages, &Language{language.Name, language.Level})
+	}
+
+	return c.Render(user, repositories, languages)
 }

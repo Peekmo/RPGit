@@ -140,6 +140,21 @@ body {
 	color: #ff7d49;
 }
 
+.btn {
+	cursor: pointer !important;
+}
+
+.ui.label.reset {
+	float: right;
+	position: relative;
+	display: none;
+	top: 9px;
+}
+
+.ui.header .icon.inline {
+	display: inline-block;
+}
+
 @media only screen and (max-width: 600px) {
 	.profile-container {
 		width: 200px;

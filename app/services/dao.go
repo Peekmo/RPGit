@@ -215,10 +215,30 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 		&result,
 	)
 
-	fmt.Println(len(result))
-
 	if err != nil {
 		revel.ERROR.Printf("Error while mapreducing event experience : %s", err.Error())
+		return nil, err
+	}
+
+	sort.Sort(result)
+	return result, nil
+}
+
+// GetAllLanguages gets the list of languages with their number of pushes
+func GetAllLanguages() (MapReduceData, error) {
+	var result MapReduceData
+
+	mapfunc := "function() { this.languages.forEach(function(language) { if (language.name != \"Unknown\" && language.name != \"\") emit(language.name, language.events.pushes);});}"
+
+	_, err := db.Database.MapReduce(
+		mapfunc,
+		"function (key, values) { return Array.sum(values) }",
+		db.COLLECTION_USER,
+		&result,
+	)
+
+	if err != nil {
+		revel.ERROR.Printf("Error while mapreducing languages : %s", err.Error())
 		return nil, err
 	}
 
