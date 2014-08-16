@@ -2,8 +2,8 @@
 @{ template "header.html" .}@
 
 <div class="ui column page grid">
-	<div class="two wide column"></div>
-	<div class="twelve wide column">
+	<div class="one wide column"></div>
+	<div class="fourteen wide column">
 		@{ if .user.Avatar }@
 		<img class="ui circular image avatar-preview" src="@{ .user.Avatar }@"/>
 		@{ else }@
@@ -28,6 +28,38 @@
 							<i class="circular icon code"></i> Programming languages
 							<hr>
 						</h4>
+
+						@{ range .user.Languages }@
+						<div class="ui rp-item">
+							<div class="floating ui red label rp-floating-item">@{ .Name }@</div>
+							<a class="ui purple label rp-item-meta"><i class="circular icon tint"></i>Level @{ .Level }@</a>
+							<div class="ui blue progress profile-item">
+								<div class="bar" style="width: 30%;"></div>
+							</div>
+
+							<div class="ui divided selection list">
+								<a class="item">
+									<div class="ui @{ colorLanguage .Events.Pushes 10 50 }@ horizontal label">@{ .Events.Pushes }@</div> Pushes
+								</a>
+								<a class="item">
+									<div class="ui @{ colorLanguage .Events.Pullrequests 1 5 }@ horizontal label">@{ .Events.Pullrequests }@</div> Pull requests
+								</a>
+								<a class="item">
+									<div class="ui @{ colorLanguage .Events.Issues 1 10 }@ horizontal label">@{ .Events.Issues }@</div> Issues opened
+								</a>
+								<a class="item">
+									<div class="ui @{ colorLanguage .Events.Comments 10 30 }@ horizontal label">@{ .Events.Comments }@</div> Comments
+								</a>
+								<a class="item">
+									<div class="ui @{ colorLanguage .Events.Forks 1 5 }@ horizontal label">@{ .Events.Forks }@</div> Forks
+								</a>
+								<a class="item">
+									<div class="ui @{ colorLanguage .Events.Stars 3 10 }@ horizontal label">@{ .Events.Stars }@</div> Stars
+								</a>
+							</div>
+						</div>
+						@{ end }@
+
 					</div>	
 				</div>
 				<div class="column">

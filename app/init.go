@@ -2,8 +2,9 @@ package app
 
 import (
 	"RPGithub/api"
-	"RPGithub/app/db"
+	"RPGithub/app/services"
 	"RPGithub/crons"
+
 	"github.com/revel/revel"
 	"github.com/revel/revel/modules/jobs/app/jobs"
 )
@@ -22,10 +23,13 @@ func init() {
 		revel.ActionInvoker,           // Invoke the action.
 	}
 
+	// Register custom template helpers
+	services.RegisterHelpers()
+
 	// register startup functions with OnAppStart
 	revel.OnAppStart(func() {
 		// Init database
-		db.InitDatabase()
+		services.InitDatabase()
 
 		// Defines CRONS
 		jobs.Schedule("cron.import", crons.Import{})

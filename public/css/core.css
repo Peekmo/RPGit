@@ -15,6 +15,11 @@ body {
 	color: #FFFFFF;
 }
 
+.rp-container>.floating.label {
+	padding: .3em .8em;
+	vertical-align: baseline;
+}
+
 .ui .first-container {
 	padding: 0px !important;
 }
@@ -91,6 +96,37 @@ body {
 	text-align: center;
 	padding-left: 30px;
 	padding-right: 30px;
+}
+
+.rp-item {
+	position: relative;
+	border: 1px solid black;
+	padding: 10px;
+	text-align: left;
+}
+
+.progress.profile-item {
+	height: 20px;
+	margin: 0;
+	margin-top: 5px;
+}
+
+.ui.progress {
+	padding: 0;
+}
+
+.floating.label.rp-floating-item {
+	left: 70% !important;
+	width: 150px;
+	text-align: center;
+}
+
+.ui.selection.list .item {
+	color: #ffffff;
+}
+
+.ui.selection.list .item:hover {
+	color: #ff7d49;
 }
 
 @media only screen and (max-width: 600px) {

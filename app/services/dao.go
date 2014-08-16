@@ -4,9 +4,10 @@ import (
 	"RPGithub/app/db"
 	"RPGithub/app/model"
 	"fmt"
-	"github.com/revel/revel"
 	"sort"
 	"strings"
+
+	"github.com/revel/revel"
 )
 
 // Map reduce data (implements sort.Interface)
@@ -28,6 +29,11 @@ func (m MapReduceData) Swap(i, j int) {
 // Less checks if the first value is greater than the second
 func (m MapReduceData) Less(i, j int) bool {
 	return m[i].Value > m[j].Value
+}
+
+// InitDatabase starts the database
+func InitDatabase() {
+	db.InitDatabase()
 }
 
 // GetUser gets a user from the database
