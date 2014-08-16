@@ -7,6 +7,21 @@ jQuery(function($) {
 	;
 	}
 
+	// Init sidebar
+	$('.ui.sidebar').sidebar();
+
+	$('#close').click(function(e) {
+		$('.sidebar').sidebar('hide', function() {
+			$('#show-menu').fadeIn();
+		});
+	});
+
+	$('#show-menu').click(function(e) {
+		$('#show-menu').fadeOut();
+		$('.sidebar').sidebar('show');
+		$('.sidebar').sidebar('pull page');
+	});
+
 	$('#search-btn').click(function(e) {
 		var name = $('#search-field').val();
 		if (name != "") {

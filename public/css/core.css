@@ -1,5 +1,6 @@
 body {
 	background-color: #333333;
+	margin-left: 0px;
 }
 
 .navbar-core {
@@ -151,8 +152,34 @@ body {
 	top: 9px;
 }
 
+.ui.label.show-menu {
+	float: left;
+	position: fixed;
+	top: 30px;
+	margin: 0 !important;
+	cursor: pointer;
+	z-index: 10;
+}
+
+.ui.label.show-menu:hover {
+	background-color: white !important;
+	color: black !important;
+}
+
 .ui.header .icon.inline {
 	display: inline-block;
+}
+
+.ui.header .icon.close {
+	float: right;
+	color: white;
+	background-color: black;
+}
+
+.ui.header .icon.close:hover{
+	color: white;
+	background-color: red;
+	cursor: pointer;
 }
 
 @media only screen and (max-width: 600px) {
