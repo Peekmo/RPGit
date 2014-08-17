@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+
 	"github.com/revel/revel"
 	"gopkg.in/mgo.v2"
 )

@@ -224,6 +224,29 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 	return result, nil
 }
 
+// RankingAllEventTotal returns the total daily events by language
+func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
+	var result MapReduceData
+
+	var mapfunc string
+	mapfunc = fmt.Sprintf("function() { if (this.type == '%s' && this.language != \"Unknown\") { emit(this.language, 1) } }", typeEvent)
+
+	_, err := db.Database.MapReduce(
+		mapfunc,
+		"function (key, values) { return Array.sum(values) }",
+		db.COLLECTION_EVENT_DAY,
+		&result,
+	)
+
+	if err != nil {
+		revel.ERROR.Printf("Error while mapreducing event total : %s", err.Error())
+		return nil, err
+	}
+
+	sort.Sort(result)
+	return result, nil
+}
+
 // GetAllLanguages gets the list of languages with their number of pushes
 func GetAllLanguages() (MapReduceData, error) {
 	var result MapReduceData

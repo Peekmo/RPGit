@@ -12,10 +12,49 @@
 			<a class="item nav" data-tab="about">About <i class="circular icon info letter"></i></a>
 		</div>
 
-		<div class="ui three column grid columns-container tab" data-tab="daily">
-			<div class="column text-center">Daily</div>
-			<div class="column text-center">Daily</div>
-			<div class="column text-center">Daily</div>
+		<div class="ui three column grid stackable columns-container tab" data-tab="daily">
+			<div class="column">
+				<div class="rp-item homepage text-center">
+					<h2 class="ui header"><i class="icon circular dashboard"></i></h2>
+					<a href="" class="ui label profile purple" id="daily-top-number-link"><h5 class="ui header" id="daily-top-number-name"></h5></a>
+					<a class="ui label profile red"><h5 class="ui header" id="daily-top-number-value"></h5></a>
+
+					<a class="ui label profile green show-ranking" data-type="daily-number"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
+				</div>
+			</div>
+			<div class="column">
+				<div class="rp-item homepage text-center">
+					<h2 class="ui header"><i class="icon circular legal"></i></h2>
+					<a href="" class="ui label profile purple" id="daily-top-experience-link"><h5 class="ui header" id="daily-top-experience-name"></h5></a>
+					<a class="ui label profile red"><h5 class="ui header" id="daily-top-experience-value"></h5></a>
+
+					<a class="ui label profile green show-ranking" data-type="daily-experience"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
+				</div>
+			</div>
+			<div class="column">
+				<div class="rp-item homepage text-center">
+					<h2 class="ui header"><i class="icon circular terminal"></i></h2>
+					<a class="ui label profile purple"><h5 class="ui header" id="daily-top-language-name"></h5></a>
+					<a class="ui label profile red"><h5 class="ui header" id="daily-top-language-value"></h5></a>
+
+					<a class="ui label profile green show-ranking" data-type="daily-language"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
+				</div>
+			</div>
+
+			<div class="handle-ranking sixteen ui wide column grid" id="ranking-daily-number" style="display:none;">
+				<div class="ui three wide column"></div>
+				<div class="ui ten wide column divided selection list ranking-list" id="daily-number"></div>
+			</div>
+
+			<div class="handle-ranking sixteen ui wide column grid" id="ranking-daily-experience" style="display:none;">
+				<div class="ui three wide column"></div>
+				<div class="ui ten wide column divided selection list ranking-list" id="daily-experience"></div>
+			</div>
+
+			<div class="handle-ranking sixteen ui wide column grid" id="ranking-daily-language" style="display:none;">
+				<div class="ui three wide column"></div>
+				<div class="ui ten wide column divided selection list ranking-list" id="daily-language"></div>
+			</div>
 		</div>
 
 		<div class="ui three column grid columns-container tab" data-tab="global">
@@ -28,11 +67,14 @@
 	</div>
 </div>
 
-
 <script id="overview-ranking" type="text/x-handlebars-template">
 	{{#each this}}
-		<div class="col-md-4 col-xs-4 col-sm-6 text-center">{{name}}</div>
+		<a class="item" href="/users/{{ key }}">
+			<div class="ui teal horizontal label">{{ value }}</div> {{ key }}
+		</a>
 	{{/each}}
 </script>
 
+@{ append . "js" "handlebars-v1.3.0.min" }@
+@{ append . "js" "index" }@
 @{ template "footer.html" .}@

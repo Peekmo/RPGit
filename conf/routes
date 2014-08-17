@@ -9,10 +9,13 @@ module:jobs
 GET     /api/users/:username                                App.GetUser
 GET     /api/users/:username/repositories                   App.GetUserRepositories
 GET     /api/languages										App.GetAllLanguages
-GET     /api/ranking/:typeEvent/number                      App.GetRankingTypeNumber
-GET     /api/ranking/:typeEvent/number/:language            App.GetRankingTypeNumberLanguage
-GET     /api/ranking/:typeEvent/experience                  App.GetRankingTypeExperience
-GET     /api/ranking/:typeEvent/experience/:language        App.GetRankingTypeExperienceLanguage
+GET     /api/ranking/daily/:typeEvent/number                App.GetRankingTypeNumber
+GET     /api/ranking/daily/:typeEvent/number/:language      App.GetRankingTypeNumberLanguage
+GET     /api/ranking/daily/:typeEvent/experience            App.GetRankingTypeExperience
+GET     /api/ranking/daily/:typeEvent/experience/:language  App.GetRankingTypeExperienceLanguage
+GET     /api/ranking/daily/all/:typeEvent/total				App.GetRankingAllTypeTotal	
+GET  	/api/ranking/home/:typeEvent						App.GetHomeRankings			
+GET  	/api/ranking/home/:typeEvent/:language				App.GetHomeRankingsLanguage			
 
 # ------------------------------- INTERFACES --------------------------------------
 GET     /                									Interface.Index

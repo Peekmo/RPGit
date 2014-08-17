@@ -71,7 +71,7 @@ func (this Import) Run() {
 			revel.ERROR.Println(err.Error())
 			return
 		}
-
+		revel.INFO.Printf("%s", fullPath)
 		data, err := this.Ungzip(fullPath)
 		if err != nil {
 			revel.ERROR.Println(err.Error())

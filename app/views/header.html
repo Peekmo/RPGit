@@ -10,10 +10,16 @@
 </head>
 <body>
 	
+@{ append . "js" "jquery-1.9.1.min" }@
+@{ append . "js" "jquery.address" }@
+@{ append . "js" "semantic.min" }@
+@{ append . "js" "core" }@
+
+
 <div class="ui label purple show-menu" id="show-menu"><h3 class="ui header"><i class="circular icon settings"></i></h3></div>
 
 <div class="ui styled sidebar">
-	<h4 class="ui header"><i class="icon circular remove close" id="close"></i></h4>
+	<h4 class="ui header menu-header"><i class="icon circular remove" id="close"></i><i class="icon circular home" id="home"></i></h4>
 	<h3 class="ui header"><i class="icon circular user"></i>Search</h3>
 	<div class="ui form">
 		<div class="ui icon input">
