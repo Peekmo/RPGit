@@ -54,8 +54,53 @@ type Repository struct {
 
 var steps [12]int = [12]int{5, 10, 30, 50, 100, 300, 500, 1000, 3000, 5000, 10000, 100000000}
 
-// Structure that implements the Job interface
+// Import Structure that implements the Job interface
 type Import struct{}
+
+// FullImport to get all data from the beginning
+type FullImport struct{}
+
+// Run is the method called by the cronjob
+// It downloads the archive file and update the database from the first day of the year
+func (this FullImport) Run() {
+	if services.IsFilled() == false {
+		revel.WARN.Print("Importing all data for this year...")
+		date := fmt.Sprintf("%d-01-01", time.Now().Year())
+
+		for date != time.Now().Format("2006-01-02") {
+			revel.INFO.Printf("---------------------> %s <-------------------", date)
+			//services.ClearEventDay()
+
+			for i := 0; i < 24; i++ {
+				fullPath, err := Download(fmt.Sprintf("%s-%d", date, i))
+				if err != nil {
+					revel.ERROR.Println(err.Error())
+					return
+				}
+				revel.INFO.Printf("%s", fullPath)
+				data, err := Ungzip(fullPath)
+				if err != nil {
+					revel.ERROR.Println(err.Error())
+				}
+
+				Parse(data, true)
+
+				// Removes the file
+				err = os.Remove(fullPath)
+				if err != nil {
+					revel.ERROR.Println(err.Error())
+				}
+			}
+
+			parsed, _ := time.Parse("2006-01-02", date)
+			date = parsed.Add(time.Duration(24) * time.Hour).Format("2006-01-02")
+
+			// Updates caches
+			services.ClearRankingCaches()
+			revel.INFO.Print("Cache cleared")
+		}
+	}
+}
 
 // Run is the method called by the cronjob
 // It downloads the archive file and update the database
@@ -66,23 +111,33 @@ func (this Import) Run() {
 	services.ClearEventDay()
 
 	for i := 0; i < 24; i++ {
-		fullPath, err := this.Download(fmt.Sprintf("%s-%d", date, i))
+		fullPath, err := Download(fmt.Sprintf("%s-%d", date, i))
 		if err != nil {
 			revel.ERROR.Println(err.Error())
 			return
 		}
 		revel.INFO.Printf("%s", fullPath)
-		data, err := this.Ungzip(fullPath)
+		data, err := Ungzip(fullPath)
 		if err != nil {
 			revel.ERROR.Println(err.Error())
 		}
 
-		this.Parse(data, true)
+		Parse(data, true)
+
+		// Removes the file
+		err = os.Remove(fullPath)
+		if err != nil {
+			revel.ERROR.Println(err.Error())
+		}
 	}
+
+	// Updates caches
+	services.ClearRankingCaches()
+	revel.INFO.Print("Cache cleared")
 }
 
 // Download Downloads the archive file from githubarchive
-func (this *Import) Download(date string) (string, error) {
+func Download(date string) (string, error) {
 	url := fmt.Sprintf("%s/%s.json.gz", revel.Config.StringDefault("imports.url", "http://data.githubarchive.org"), date)
 
 	tokens := strings.Split(url, "/")
@@ -125,7 +180,7 @@ func (this *Import) Download(date string) (string, error) {
 }
 
 // Ungzip ungzip the given gzipped file and returns its content
-func (this *Import) Ungzip(file string) (string, error) {
+func Ungzip(file string) (string, error) {
 	// Read the file
 	fileReader, err := os.Open(file)
 	if err != nil {
@@ -149,7 +204,7 @@ func (this *Import) Ungzip(file string) (string, error) {
 }
 
 // Parse the given json string and updates the database with it
-func (this *Import) Parse(data string, ranking bool) {
+func Parse(data string, ranking bool) {
 	array := strings.Split(data, "\n")
 	var total int = len(array)
 
@@ -221,7 +276,7 @@ func (this *Import) Parse(data string, ranking bool) {
 			language.Events.Pushes += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					xp = 50 * (key + (key + 1))
+					xp = 2 * (key + 1)
 					break
 				}
 			}
@@ -238,19 +293,14 @@ func (this *Import) Parse(data string, ranking bool) {
 			language.Events.Issues += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					xp = 5 * (key + (key + 1))
+					xp = 3 * (key + 1)
 					break
 				}
 			}
 
 		case "issuecommentevent":
 			language.Events.Comments += 1
-			for key, value := range steps {
-				if jsonmap.Repository.Stars < value {
-					xp = 1 * (key + (key + 1))
-					break
-				}
-			}
+			xp = 1
 
 		case "watchevent":
 			language.Events.Stars += 1
@@ -258,25 +308,20 @@ func (this *Import) Parse(data string, ranking bool) {
 
 		case "forkevent":
 			language.Events.Forks += 1
-			xp = 5
+			xp = 1
 
 		case "pullrequestevent":
 			language.Events.Pullrequests += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					xp = 300 * (key + (key + 1))
+					xp = 5 * (key + 1)
 					break
 				}
 			}
 
 		case "pullrequestreviewcommentevent":
 			language.Events.Comments += 1
-			for key, value := range steps {
-				if jsonmap.Repository.Stars < value {
-					xp = 1 * (key + (key + 1))
-					break
-				}
-			}
+			xp = 1
 		}
 
 		// Register a daily event

@@ -18,7 +18,7 @@
 					<div class="ui purple label profile"><i class="circular icon github"></i><a target="_blank" href="http://github.com/@{.user.Username}@">@{ .user.Username }@</a></div>
 					<div class="ui purple label profile"><i class="circular icon tint"></i> Level <strong>@{ .user.Level }@</strong></div>
 					<div class="ui blue progress profile">
-						<div class="bar" style="width: 30%;"></div>
+						<div class="bar" style="width: @{ .user.Percent }@%;"></div>
 					</div>
 				</div>
 			</div>
@@ -36,7 +36,7 @@
 							<div class="floating ui red label rp-floating-item">@{ .Name }@</div>
 							<a class="ui purple label rp-item-meta"><i class="circular icon tint"></i>Level @{ .Level }@</a>
 							<div class="ui blue progress profile-item">
-								<div class="bar" style="width: 30%;"></div>
+								<div class="bar" style="width: @{ .Percent }@%;"></div>
 							</div>
 
 							<div class="ui divided selection list">

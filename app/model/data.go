@@ -11,6 +11,7 @@ type User struct {
 	Avatar     string      `json:"avatar"`
 	Level      int         `json:"level"`
 	Experience int         `json:"experience"`
+	Percent    int         `json:"percent"`
 	Languages  []*Language `json:"languages"`
 }
 
@@ -20,6 +21,7 @@ type Language struct {
 	Events     *Events `json:"events"`
 	Level      int     `json:"level"`
 	Experience int     `json:"experience"`
+	Percent    int     `json:"percent"`
 }
 
 type Events struct {
@@ -96,7 +98,8 @@ func NewBlacklist(name, reason string) *Blacklist {
 // It also calculates its current level
 func (this *User) AddExperience(xp int) {
 	this.Experience += xp
-	this.Level = getLevel(this.Experience)
+	this.Level = getLevel(this.Level, this.Experience)
+	this.Percent = getPercent(this.Level, this.Experience)
 }
 
 // GetLanguage gets an instance of the given language id
@@ -108,7 +111,7 @@ func (this *User) GetLanguage(id string) *Language {
 		}
 	}
 
-	language := &Language{id, id, &Events{}, 1, 0}
+	language := &Language{id, id, &Events{}, 1, 0, 0}
 	this.Languages = append(this.Languages, language)
 
 	return language
@@ -118,14 +121,29 @@ func (this *User) GetLanguage(id string) *Language {
 // It also calculates its current level
 func (this *Language) AddExperience(xp int) {
 	this.Experience += xp
-	this.Level = getLevel(this.Experience)
+	this.Level = getLevel(this.Level, this.Experience)
+	this.Percent = getPercent(this.Level, this.Experience)
 }
 
 // ---- Tools
 
 // getLevel returns the level for the given experience
-func getLevel(experience int) int {
-	return (experience / 100) + 1
+func getLevel(level, experience int) int {
+	if experience >= getExperience(level) {
+		return level + 1
+	}
+
+	return level
+}
+
+// getPercent returns the percentage of the current level
+func getPercent(level, experience int) int {
+	return experience * 100 / getExperience(level)
+}
+
+// getExperience returns experience needed for the next level
+func getExperience(level int) int {
+	return (level * 10) + ((level - 1) * 10)
 }
 
 // ----- Sorts

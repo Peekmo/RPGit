@@ -16,7 +16,6 @@ func init() {
 		revel.RouterFilter,            // Use the routing table to select the right Action
 		revel.FilterConfiguringFilter, // A hook for adding or removing per-Action filters.
 		revel.ParamsFilter,            // Parse parameters into Controller.Params.
-		revel.SessionFilter,           // Restore and write the session cookie.
 		HeaderFilter,                  // Add some security based headers
 		revel.InterceptorFilter,       // Run interceptors around the action.
 		revel.CompressFilter,          // Compress the result.
@@ -33,6 +32,8 @@ func init() {
 
 		// Defines CRONS
 		jobs.Schedule("cron.import", crons.Import{})
+		jobs.Now(crons.WarmCache{})
+		jobs.Now(crons.FullImport{})
 	})
 }
 
@@ -44,6 +45,7 @@ var HeaderFilter = func(c *revel.Controller, fc []revel.Filter) {
 	c.Response.Out.Header().Add("X-Frame-Options", "SAMEORIGIN")
 	c.Response.Out.Header().Add("X-XSS-Protection", "1; mode=block")
 	c.Response.Out.Header().Add("X-Content-Type-Options", "nosniff")
+	c.Response.Out.Header().Add("Cache-Control", "max-age=100000, public")
 
 	fc[0](c, fc[1:]) // Execute the next filter stage.
 }

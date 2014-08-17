@@ -10,33 +10,45 @@ function reset() {
 	$('#reset').fadeOut();
 }
 
+function open(element) {
+	$(element).find('i').removeClass('add sign');
+	$(element).find('i').addClass('minus sign');
+	$(element).removeClass('green');
+	$(element).addClass('red');
+}
+
+function close(element) {
+	$(element).find('i').removeClass('minus sign');
+	$(element).find('i').addClass('add sign');
+	$(element).removeClass('red');
+	$(element).addClass('green');
+}
+
+$(".nav.index").click(function(e) {
+	$(".handle-ranking").hide();
+	$(".show-ranking").each(function(i, e) {
+		close(e);
+	});
+});
+
+
 $(".show-ranking").click(function(e) {
 	var type = $(this).attr("data-type");
 	var icon = $(this).find('i');
 
 	$(".show-ranking").each(function(i, e) {
 		if ($(e).attr('data-type') != type) {
-			$(e).find('i').removeClass('minus sign');
-			$(e).find('i').addClass('add sign');
-			$(e).removeClass('red');
-			$(e).addClass('green');
+			close(e);
 		}
 	});
 
 	$(".handle-ranking").fadeOut();
 
 	if (icon.hasClass('add sign')) {
-		icon.removeClass('add sign');
-		icon.addClass('minus sign');
-		$(this).removeClass('green');
-		$(this).addClass('red');
-
+		open(this);
 		$("#ranking-" + type).fadeIn();
 	} else {
-		icon.removeClass('minus sign');
-		icon.addClass('add sign');
-		$(this).removeClass('red');
-		$(this).addClass('green');
+		close(this);
 	}
 });
 

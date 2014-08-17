@@ -82,12 +82,12 @@ func (c *App) GetRankingAllTypeTotal(typeEvent string) revel.Result {
 
 // GetHomeRankings gets all ranking data (no matter the language)
 func (c *App) GetHomeRankings(typeEvent string) revel.Result {
-	return c.RenderJson(fetchAllRankingData(typeEvent, ""))
+	return c.RenderJson(services.FetchAllRankingData(typeEvent, "", true))
 }
 
 // GetHomeRankingsLanguage gets all ranking data for the given language)
 func (c *App) GetHomeRankingsLanguage(typeEvent, language string) revel.Result {
-	return c.RenderJson(fetchAllRankingData(typeEvent, language))
+	return c.RenderJson(services.FetchAllRankingData(typeEvent, language, true))
 }
 
 // GetAllLanguages returns all languages with their number of events
@@ -95,28 +95,4 @@ func (c *App) GetAllLanguages() revel.Result {
 	data, _ := services.GetAllLanguages()
 
 	return c.RenderJson(data)
-}
-
-// fetchAllRankingData builds the result by language or not
-func fetchAllRankingData(typeEvent, language string) map[string](map[string]interface{}) {
-	var data map[string](map[string]interface{}) = make(map[string](map[string]interface{}))
-	var dailyNumber services.MapReduceData
-	var dailyExperience services.MapReduceData
-
-	if language != "" {
-		dailyNumber, _ = services.RankingEventNumber(typeEvent, language)
-		dailyExperience, _ = services.RankingEventExperience(typeEvent, language)
-	} else {
-		dailyNumber, _ = services.RankingEventNumber(typeEvent)
-		dailyExperience, _ = services.RankingEventExperience(typeEvent)
-	}
-
-	dailyLanguage, _ := services.RankingAllEventTotal(typeEvent)
-
-	data["daily"] = map[string]interface{}{
-		"number":     dailyNumber[0:int(math.Min(float64(len(dailyNumber)), float64(50)))],
-		"experience": dailyExperience[0:int(math.Min(float64(len(dailyExperience)), float64(50)))],
-		"language":   dailyLanguage[0:int(math.Min(float64(len(dailyLanguage)), float64(50)))],
-	}
-	return data
 }

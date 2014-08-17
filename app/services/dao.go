@@ -4,14 +4,18 @@ import (
 	"RPGithub/app/db"
 	"RPGithub/app/model"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 
 	"github.com/revel/revel"
+	"github.com/revel/revel/cache"
 )
 
 // Map reduce data (implements sort.Interface)
-type MapReduceData []struct {
+type MapReduceData []KeyValue
+
+type KeyValue struct {
 	Key   string `json:"key" bson:"_id"`
 	Value int    `json:"value"`
 }
@@ -34,6 +38,17 @@ func (m MapReduceData) Less(i, j int) bool {
 // InitDatabase starts the database
 func InitDatabase() {
 	db.InitDatabase()
+}
+
+// IsFilled allows to know if the data has been filled in database or not
+// It checks for the number of repositories
+func IsFilled() bool {
+	var repositories []*model.Repository
+
+	data := db.Database.GetQuery(map[string]string{}, db.COLLECTION_REPOSITORY)
+	data.Limit(1).All(&repositories)
+
+	return (len(repositories) == 1)
 }
 
 // GetUser gets a user from the database
@@ -151,6 +166,71 @@ func RegisterBlacklist(blacklist *model.Blacklist) error {
 	return nil
 }
 
+// RankingExperience returns 50 first users sorted by experience
+func RankingExperience() []KeyValue {
+	var users []*model.User
+
+	data := db.Database.GetQuery(map[string]string{}, db.COLLECTION_USER).Sort("-experience").Limit(50)
+	data.All(&users)
+
+	var formatted []KeyValue
+	for _, user := range users {
+		formatted = append(formatted, KeyValue{user.Username, user.Experience})
+	}
+
+	return formatted
+}
+
+// RankingExperienceLanguage returns 50 first users sorted by experience for the given language
+func RankingExperienceLanguage(language string) (MapReduceData, error) {
+	var result MapReduceData
+
+	mapfunc := fmt.Sprintf("function() { for (var lang in this.languages) { if (this.languages[lang].name == '%s') { emit(this.username, this.languages[lang].experience); return; } } }", language)
+
+	_, err := db.Database.MapReduce(
+		mapfunc,
+		"function (key, values) { return Array.sum(values) }",
+		db.COLLECTION_USER,
+		&result,
+	)
+
+	if err != nil {
+		revel.ERROR.Printf("Error while mapreducing experience language : %s", err.Error())
+		return nil, err
+	}
+
+	sort.Sort(result)
+	return result, nil
+}
+
+// RankingGlobalEventNumber gets from the daily events, the ranking by number of events
+func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
+	var result MapReduceData
+
+	var mapfunc string
+	if len(params) == 1 {
+		mapfunc = fmt.Sprintf("function() { for (var lang in this.languages) { emit(this.username, this.languages[lang].events.pushes) } }")
+	} else {
+		mapfunc = fmt.Sprintf("function() { for (var lang in this.languages) { if (this.languages[lang].name == '%s') { emit(this.username, this.languages[lang].events.pushes); return; } } }", params[1])
+	}
+
+	_, err := db.Database.MapReduce(
+		mapfunc,
+		"function (key, values) { return Array.sum(values) }",
+		db.COLLECTION_USER,
+		&result,
+	)
+
+	if err != nil {
+		revel.ERROR.Printf("Error while mapreducing event number : %s", err.Error())
+		return nil, err
+	}
+
+	sort.Sort(result)
+
+	return result, nil
+}
+
 // RankingEventNumber gets from the daily events, the ranking by number of events
 func RankingEventNumber(params ...string) (MapReduceData, error) {
 	var result MapReduceData
@@ -169,8 +249,6 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 		&result,
 	)
 
-	fmt.Println(len(result))
-
 	if err != nil {
 		revel.ERROR.Printf("Error while mapreducing event number : %s", err.Error())
 		return nil, err
@@ -188,6 +266,7 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 			} else {
 				RegisterBlacklist(model.NewBlacklist(value.Key, fmt.Sprintf("Number of events too big (%d)", value.Value)))
 				db.Database.Remove(map[string]string{"user": value.Key}, db.COLLECTION_EVENT_DAY)
+				db.Database.Remove(map[string]string{"_id": value.Key}, db.COLLECTION_USER)
 			}
 		}
 
@@ -278,4 +357,65 @@ func ClearEventDay() error {
 	}
 
 	return nil
+}
+
+// FetchAllRankingData builds the result by language or not
+func FetchAllRankingData(typeEvent, language string, useCache bool) map[string](map[string]MapReduceData) {
+	var data map[string](map[string]MapReduceData) = make(map[string](map[string]MapReduceData))
+
+	err := cache.Get(fmt.Sprintf("ranking-home-%s-%s", typeEvent, strings.Join(strings.Split(language, " "), "")), &data)
+	if err != nil || useCache == false {
+		if err != nil {
+			fmt.Print(err.Error())
+		}
+
+		var dailyNumber MapReduceData
+		var dailyExperience MapReduceData
+		var globalExperience []KeyValue
+		var globalNumber MapReduceData
+
+		if language != "" {
+			dailyNumber, _ = RankingEventNumber(typeEvent, language)
+			dailyExperience, _ = RankingEventExperience(typeEvent, language)
+			globalExperience, _ = RankingExperienceLanguage(language)
+			globalNumber, _ = RankingGlobalEventNumber(typeEvent, language)
+		} else {
+			dailyNumber, _ = RankingEventNumber(typeEvent)
+			dailyExperience, _ = RankingEventExperience(typeEvent)
+			globalExperience = RankingExperience()
+			globalNumber, _ = RankingGlobalEventNumber(typeEvent)
+		}
+
+		dailyLanguage, _ := RankingAllEventTotal(typeEvent)
+		globalLanguage, _ := GetAllLanguages()
+
+		data["daily"] = map[string]MapReduceData{
+			"number":     dailyNumber[0:int(math.Min(float64(len(dailyNumber)), float64(50)))],
+			"experience": dailyExperience[0:int(math.Min(float64(len(dailyExperience)), float64(50)))],
+			"language":   dailyLanguage[0:int(math.Min(float64(len(dailyLanguage)), float64(50)))],
+		}
+
+		data["global"] = map[string]MapReduceData{
+			"number":     globalNumber[0:int(math.Min(float64(len(globalNumber)), float64(50)))],
+			"experience": globalExperience[0:int(math.Min(float64(len(globalExperience)), float64(50)))],
+			"language":   globalLanguage[0:int(math.Min(float64(len(dailyLanguage)), float64(50)))],
+		}
+
+		cache.Set(fmt.Sprintf("ranking-home-%s-%s", typeEvent, strings.Join(strings.Split(language, " "), "")), data, cache.DEFAULT)
+	}
+
+	return data
+}
+
+// ClearRankingCaches updates the in-memory cache
+func ClearRankingCaches() {
+	revel.INFO.Print("Clearing memory cache...")
+
+	FetchAllRankingData("pushevent", "", false)
+	languages, _ := GetAllLanguages()
+	for _, language := range languages {
+		FetchAllRankingData("pushevent", language.Key, false)
+	}
+
+	Ban("/")
 }

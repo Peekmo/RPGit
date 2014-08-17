@@ -190,6 +190,10 @@ body {
 	text-decoration: none;
 }
 
+.ui.grid.hide {
+	display: none;
+}
+
 @media only screen and (max-width: 600px) {
 	.profile-container {
 		width: 200px;
