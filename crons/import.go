@@ -69,7 +69,7 @@ func (this FullImport) Run() {
 
 		for date != time.Now().Format("2006-01-02") {
 			revel.INFO.Printf("---------------------> %s <-------------------", date)
-			//services.ClearEventDay()
+			services.ClearEventDay()
 
 			for i := 0; i < 24; i++ {
 				fullPath, err := Download(fmt.Sprintf("%s-%d", date, i))

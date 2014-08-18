@@ -2,13 +2,15 @@ package db
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/revel/revel"
 	"gopkg.in/mgo.v2"
 )
 
 type Mongo struct {
-	db *mgo.Database
+	Db      *mgo.Database
+	Session *mgo.Session
 }
 
 var (
@@ -26,37 +28,37 @@ const (
 
 // Set a document in the database
 func (this *Mongo) Set(doc interface{}, collection string) error {
-	return this.db.C(collection).Insert(doc)
+	return this.Db.C(collection).Insert(doc)
 }
 
 // Get a document by its identifier
 func (this *Mongo) Get(id interface{}, collection string) *mgo.Query {
-	return this.db.C(collection).FindId(id)
+	return this.Db.C(collection).FindId(id)
 }
 
 // Update the given document
 func (this *Mongo) Update(key, value interface{}, collection string) error {
-	return this.db.C(collection).UpdateId(key, value)
+	return this.Db.C(collection).UpdateId(key, value)
 }
 
 // GetQuery gets all documents following the givne query
 func (this *Mongo) GetQuery(query interface{}, collection string) *mgo.Query {
-	return this.db.C(collection).Find(query)
+	return this.Db.C(collection).Find(query)
 }
 
 // UpdateQuery updates documents with the given query
 func (this *Mongo) UpdateQuery(query, data interface{}, collection string) error {
-	return this.db.C(collection).Update(query, data)
+	return this.Db.C(collection).Update(query, data)
 }
 
 // ClearCollection removes all documents from the given collection
 func (this *Mongo) ClearCollection(collection string) (*mgo.ChangeInfo, error) {
-	return this.db.C(collection).RemoveAll(map[string]string{})
+	return this.Db.C(collection).RemoveAll(map[string]string{})
 }
 
 // Remove removes elements from the given collection following the query
 func (this *Mongo) Remove(query interface{}, collection string) (*mgo.ChangeInfo, error) {
-	return this.db.C(collection).RemoveAll(query)
+	return this.Db.C(collection).RemoveAll(query)
 }
 
 // MapReduce executes the given map reduce function
@@ -66,7 +68,12 @@ func (this *Mongo) MapReduce(mapfunc, reduce, collection string, result interfac
 		Reduce: reduce,
 	}
 
-	return this.db.C(collection).Find(nil).MapReduce(job, result)
+	return this.Db.C(collection).Find(nil).MapReduce(job, result)
+}
+
+// Changes db's session (timeout reason)
+func (this *Mongo) InitSession() {
+	this.Db.Session = this.Session.Copy()
 }
 
 // InitDatabse initialize the mongodb session
@@ -81,7 +88,8 @@ func InitDatabase() {
 		panic(err)
 	}
 
+	session.SetSocketTimeout(1 * time.Hour)
 	db := session.DB(revel.Config.StringDefault("mongo.database", "RPGithub"))
 
-	Database = &Mongo{db}
+	Database = &Mongo{db, db.Session}
 }

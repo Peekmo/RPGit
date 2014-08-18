@@ -43,6 +43,9 @@ func InitDatabase() {
 // IsFilled allows to know if the data has been filled in database or not
 // It checks for the number of repositories
 func IsFilled() bool {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var repositories []*model.Repository
 
 	data := db.Database.GetQuery(map[string]string{}, db.COLLECTION_REPOSITORY)
@@ -53,6 +56,9 @@ func IsFilled() bool {
 
 // GetUser gets a user from the database
 func GetUser(username string) *model.User {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var user *model.User
 
 	userData := db.Database.Get(strings.ToLower(username), db.COLLECTION_USER)
@@ -66,6 +72,9 @@ func GetUser(username string) *model.User {
 
 // IsBlacklisted checks if the given user is blacklisted or not
 func IsBlacklisted(name string) bool {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var blacklist *model.Blacklist
 
 	blacklistData := db.Database.Get(strings.ToLower(name), db.COLLECTION_BLACKLIST)
@@ -79,6 +88,9 @@ func IsBlacklisted(name string) bool {
 
 // GetRepository gets a new repository from the database
 func GetRepository(id int) *model.Repository {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var repository *model.Repository
 
 	repositoryData := db.Database.Get(id, db.COLLECTION_REPOSITORY)
@@ -92,6 +104,9 @@ func GetRepository(id int) *model.Repository {
 
 // GetUserRepositories gets a list of repositories from the given user
 func GetUserRepositories(username string) []*model.Repository {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var repositories []*model.Repository
 
 	data := db.Database.GetQuery(map[string]string{"owner": strings.ToLower(username)}, db.COLLECTION_REPOSITORY)
@@ -102,6 +117,9 @@ func GetUserRepositories(username string) []*model.Repository {
 
 // UpdateUser updates the given user from the database
 func UpdateUser(user *model.User) error {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	err := db.Database.Update(user.Id, user, db.COLLECTION_USER)
 	if err != nil {
 		revel.ERROR.Printf("Error while updating data : %s", err.Error())
@@ -113,6 +131,9 @@ func UpdateUser(user *model.User) error {
 
 // UpdateRepository updates the repository in the database
 func UpdateRepository(repository *model.Repository) error {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	err := db.Database.Update(repository.Id, repository, db.COLLECTION_REPOSITORY)
 	if err != nil {
 		revel.ERROR.Printf("Error while updating data : %s", err.Error())
@@ -124,6 +145,9 @@ func UpdateRepository(repository *model.Repository) error {
 
 // RegisterRepository register in database a new repository
 func RegisterRepository(repository *model.Repository) error {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	err := db.Database.Set(repository, db.COLLECTION_REPOSITORY)
 	if err != nil {
 		revel.ERROR.Printf("Error while saving new repository : %s", err.Error())
@@ -135,6 +159,9 @@ func RegisterRepository(repository *model.Repository) error {
 
 // RegisterRepository register in database a new repository
 func RegisterUser(user *model.User) error {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	err := db.Database.Set(user, db.COLLECTION_USER)
 	if err != nil {
 		revel.ERROR.Printf("Error while saving new user : %s", err.Error())
@@ -146,6 +173,9 @@ func RegisterUser(user *model.User) error {
 
 // RegisterEventDay registers a new event
 func RegisterEventDay(event *model.EventDay) error {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	err := db.Database.Set(event, db.COLLECTION_EVENT_DAY)
 	if err != nil {
 		revel.ERROR.Printf("Error while saving new event : %s", err.Error())
@@ -157,6 +187,9 @@ func RegisterEventDay(event *model.EventDay) error {
 
 // RegisterEventDay registers a new blacklist
 func RegisterBlacklist(blacklist *model.Blacklist) error {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	err := db.Database.Set(blacklist, db.COLLECTION_BLACKLIST)
 	if err != nil {
 		revel.ERROR.Printf("Error while saving new blacklist : %s", err.Error())
@@ -168,6 +201,9 @@ func RegisterBlacklist(blacklist *model.Blacklist) error {
 
 // RankingExperience returns 50 first users sorted by experience
 func RankingExperience() []KeyValue {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var users []*model.User
 
 	data := db.Database.GetQuery(map[string]string{}, db.COLLECTION_USER).Sort("-experience").Limit(50)
@@ -183,6 +219,9 @@ func RankingExperience() []KeyValue {
 
 // RankingExperienceLanguage returns 50 first users sorted by experience for the given language
 func RankingExperienceLanguage(language string) (MapReduceData, error) {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var result MapReduceData
 
 	mapfunc := fmt.Sprintf("function() { for (var lang in this.languages) { if (this.languages[lang].name == '%s') { emit(this.username, this.languages[lang].experience); return; } } }", language)
@@ -205,6 +244,9 @@ func RankingExperienceLanguage(language string) (MapReduceData, error) {
 
 // RankingGlobalEventNumber gets from the daily events, the ranking by number of events
 func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var result MapReduceData
 
 	var mapfunc string
@@ -233,6 +275,9 @@ func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
 
 // RankingEventNumber gets from the daily events, the ranking by number of events
 func RankingEventNumber(params ...string) (MapReduceData, error) {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var result MapReduceData
 
 	var mapfunc string
@@ -278,6 +323,9 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 
 // RankingEventExperience gets from the daily events, the ranking by experience
 func RankingEventExperience(params ...string) (MapReduceData, error) {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var result MapReduceData
 
 	var mapfunc string
@@ -305,6 +353,9 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 
 // RankingAllEventTotal returns the total daily events by language
 func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var result MapReduceData
 
 	var mapfunc string
@@ -330,26 +381,37 @@ func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
 func GetAllLanguages() (MapReduceData, error) {
 	var result MapReduceData
 
-	mapfunc := "function() { this.languages.forEach(function(language) { if (language.name != \"Unknown\" && language.name != \"\") emit(language.name, language.events.pushes);});}"
-
-	_, err := db.Database.MapReduce(
-		mapfunc,
-		"function (key, values) { return Array.sum(values) }",
-		db.COLLECTION_USER,
-		&result,
-	)
-
+	err := cache.Get("all_languages", &result)
 	if err != nil {
-		revel.ERROR.Printf("Error while mapreducing languages : %s", err.Error())
-		return nil, err
+		db.Database.InitSession()
+		defer db.Database.Db.Session.Close()
+
+		mapfunc := "function() { this.languages.forEach(function(language) { if (language.name != \"Unknown\" && language.name != \"\") emit(language.name, language.events.pushes);});}"
+
+		_, err := db.Database.MapReduce(
+			mapfunc,
+			"function (key, values) { return Array.sum(values) }",
+			db.COLLECTION_USER,
+			&result,
+		)
+
+		if err != nil {
+			revel.ERROR.Printf("Error while mapreducing languages : %s", err.Error())
+			return nil, err
+		}
+
+		sort.Sort(result)
+		cache.Set("all_languages", result, cache.DEFAULT)
 	}
 
-	sort.Sort(result)
 	return result, nil
 }
 
 // ClearEventDay removes all elements from events collection
 func ClearEventDay() error {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	_, err := db.Database.ClearCollection(db.COLLECTION_EVENT_DAY)
 	if err != nil {
 		revel.ERROR.Printf("Error while clearing events collection : %s", err.Error())
@@ -361,6 +423,9 @@ func ClearEventDay() error {
 
 // FetchAllRankingData builds the result by language or not
 func FetchAllRankingData(typeEvent, language string, useCache bool) map[string](map[string]MapReduceData) {
+	db.Database.InitSession()
+	defer db.Database.Db.Session.Close()
+
 	var data map[string](map[string]MapReduceData) = make(map[string](map[string]MapReduceData))
 
 	err := cache.Get(fmt.Sprintf("ranking-home-%s-%s", typeEvent, strings.Join(strings.Split(language, " "), "")), &data)
@@ -411,8 +476,9 @@ func FetchAllRankingData(typeEvent, language string, useCache bool) map[string](
 func ClearRankingCaches() {
 	revel.INFO.Print("Clearing memory cache...")
 
-	FetchAllRankingData("pushevent", "", false)
+	cache.Delete("all_languages")
 	languages, _ := GetAllLanguages()
+	FetchAllRankingData("pushevent", "", false)
 	for _, language := range languages {
 		FetchAllRankingData("pushevent", language.Key, false)
 	}
