@@ -10,6 +10,20 @@ body {
 	box-shadow: 0 0 12px #202020;
 }
 
+.header-rpg {
+	width: 100%;
+	cursor: pointer;
+}
+
+.header-rpg-home {
+	height: 100px;
+}
+
+.header-rpg-user {
+	height: 120px;
+	position: absolute;
+}
+
 .rp-container {
 	margin-bottom: 14px;
 	background-color: #202020;
@@ -32,15 +46,21 @@ body {
 	padding: 10px;
 }
 
+.ui.menu .item:before {
+	width: 0;
+}
+
 .ui.inverted.menu.nav-menu {
 	padding: 0px;
 	border-radius: 10px;
-	background-color: #1A1A1A;
+	background-color: black;
+	box-shadow: 0 0 15px black;	
 }
 
 .ui.menu .item.nav {
-	background-color: #1A1A1A;
+	background-color: black;
 	border-radius: 10px;
+	padding: 5px;
 	font-weight: bold;
 }
 
@@ -63,14 +83,14 @@ body {
 	height: 100px;
 	border: 1px solid #000000;
 	box-shadow: 0 0 12px #202020;
-	top: 40px;
+	top: 60px;
 	margin: auto;
 	position: absolute;
 }
 
 .profile-container {
 	padding: 5px;
-	padding-top: 45px;
+	padding-top: 65px;
 	margin: auto;
 	width: 300px;
 	background-color: #FF7D49;

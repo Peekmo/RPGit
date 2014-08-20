@@ -20,6 +20,10 @@ jQuery(function($) {
 		document.location.href= "/";
 	});
 
+	$('.header-rpg').click(function(e) {
+		document.location.href = "/";
+	});
+
 
 	$('#show-menu').click(function(e) {
 		$('#show-menu').fadeOut();

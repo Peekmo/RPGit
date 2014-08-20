@@ -3,16 +3,15 @@
 @{ set . "languages" .languages }@
 @{ template "header.html" .}@
 
+<div class="header-rpg header-rpg-user"></div>
 <div class="ui column page grid">
 	<div class="one wide column"></div>
 	<div class="fourteen wide column">
-		<a target="_blank" href="http://github.com/@{ .user.Username }@">
-			@{ if .user.Avatar }@
-			<img class="ui circular image avatar-preview" src="@{ .user.Avatar }@"/>
-			@{ else }@
-			<img class="ui circular image avatar-preview" src="../public/img/default-avatar.png"/>
-			@{ end }@
-		</a>
+		@{ if .user.Avatar }@
+		<img class="ui circular image avatar-preview" src="@{ .user.Avatar }@"/>
+		@{ else }@
+		<img class="ui circular image avatar-preview" src="../public/img/default-avatar.png"/>
+		@{ end }@
 
 		<div class="ui rp-container first-container">
 			<div class="profile-container">
