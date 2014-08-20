@@ -1,6 +1,9 @@
 body {
-	background-color: #333333;
+	background-color: #453434;
 	margin-left: 0px;
+	background-image: url('../img/bg.png');
+	background-repeat: no-repeat;
+	background-position: top center;
 }
 
 .navbar-core {
