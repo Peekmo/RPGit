@@ -1,9 +1,16 @@
+
+	<footer class="links text-center">
+		<p>Created with love by <a target="_blank" href="http://github.com/Peekmo">Axel Anceau (@Peekmo)</a> | Data from the exceptionals <a target="_blank" href="http://www.githubarchive.org/">Github's data</a></p>
+		<iframe src="http://ghbtns.com/github-btn.html?user=peekmo&repo=RPGit&type=fork&size=large&count=true"
+        allowtransparency="true" frameborder="0" scrolling="0" width="130" height="30"></iframe> 
+		<a href="https://twitter.com/Peekmo" class="twitter-follow-button" data-show-count="false" data-lang="en"i data-size="large">Follow @Peekmo</a>
+	</footer>
+
     @{ if eq .RunMode "dev" }@
         @{ template "debug.html" . }@
     @{ end }@
   
-<!--         <iframe src="http://ghbtns.com/github-btn.html?user=peekmo&repo=RPGithub&type=fork&size=medium&count=true"
-        allowtransparency="true" frameborder="0" scrolling="0" width="100" height="20"></iframe> -->
+   
 	@{ append . "js" "jquery-1.9.1.min" }@
 	@{ append . "js" "jquery.address" }@
 	@{ append . "js" "semantic.min" }@
@@ -12,6 +19,8 @@
 	@{ range .js }@
 	<script src="/public/js/@{ . }@.js" type="text/javascript" charset="utf-8"></script>
 	@{ end }@
+
+	<script type="text/javascript">!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 
   	</body>
 </html>

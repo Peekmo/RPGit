@@ -6,6 +6,16 @@ body {
 	background-position: top center;
 }
 
+.links {
+	color: white;
+}
+
+.links a {
+	font-weight: bold;
+	color: #74D0F1;	
+	text-decoration: none;
+}
+
 .navbar-core {
 	box-shadow: 0 0 12px #202020;
 }

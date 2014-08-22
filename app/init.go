@@ -1,9 +1,9 @@
 package app
 
 import (
-	"RPGithub/api"
-	"RPGithub/app/services"
-	"RPGithub/crons"
+	"RPGit/api"
+	"RPGit/app/services"
+	"RPGit/crons"
 
 	"github.com/revel/revel"
 	"github.com/revel/revel/modules/jobs/app/jobs"

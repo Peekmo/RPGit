@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"RPGithub/api"
-	"RPGithub/app/services"
+	"RPGit/api"
+	"RPGit/app/services"
 	"math"
 
 	"github.com/revel/revel"

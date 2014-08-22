@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"RPGithub/app/model"
-	"RPGithub/app/services"
+	"RPGit/app/model"
+	"RPGit/app/services"
 	"sort"
 
 	"github.com/revel/revel"

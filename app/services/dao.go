@@ -1,8 +1,8 @@
 package services
 
 import (
-	"RPGithub/app/db"
-	"RPGithub/app/model"
+	"RPGit/app/db"
+	"RPGit/app/model"
 	"fmt"
 	"math"
 	"sort"
@@ -44,7 +44,7 @@ func InitDatabase() {
 // It checks for the number of repositories
 func IsFilled() bool {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var repositories []*model.Repository
 
@@ -57,7 +57,7 @@ func IsFilled() bool {
 // GetUser gets a user from the database
 func GetUser(username string) *model.User {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var user *model.User
 
@@ -73,7 +73,7 @@ func GetUser(username string) *model.User {
 // IsBlacklisted checks if the given user is blacklisted or not
 func IsBlacklisted(name string) bool {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var blacklist *model.Blacklist
 
@@ -89,7 +89,7 @@ func IsBlacklisted(name string) bool {
 // GetRepository gets a new repository from the database
 func GetRepository(id int) *model.Repository {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var repository *model.Repository
 
@@ -105,7 +105,7 @@ func GetRepository(id int) *model.Repository {
 // GetUserRepositories gets a list of repositories from the given user
 func GetUserRepositories(username string) []*model.Repository {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var repositories []*model.Repository
 
@@ -118,7 +118,7 @@ func GetUserRepositories(username string) []*model.Repository {
 // UpdateUser updates the given user from the database
 func UpdateUser(user *model.User) error {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	err := db.Database.Update(user.Id, user, db.COLLECTION_USER)
 	if err != nil {
@@ -132,7 +132,7 @@ func UpdateUser(user *model.User) error {
 // UpdateRepository updates the repository in the database
 func UpdateRepository(repository *model.Repository) error {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	err := db.Database.Update(repository.Id, repository, db.COLLECTION_REPOSITORY)
 	if err != nil {
@@ -146,7 +146,7 @@ func UpdateRepository(repository *model.Repository) error {
 // RegisterRepository register in database a new repository
 func RegisterRepository(repository *model.Repository) error {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	err := db.Database.Set(repository, db.COLLECTION_REPOSITORY)
 	if err != nil {
@@ -160,7 +160,7 @@ func RegisterRepository(repository *model.Repository) error {
 // RegisterRepository register in database a new repository
 func RegisterUser(user *model.User) error {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	err := db.Database.Set(user, db.COLLECTION_USER)
 	if err != nil {
@@ -174,7 +174,7 @@ func RegisterUser(user *model.User) error {
 // RegisterEventDay registers a new event
 func RegisterEventDay(event *model.EventDay) error {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	err := db.Database.Set(event, db.COLLECTION_EVENT_DAY)
 	if err != nil {
@@ -188,7 +188,7 @@ func RegisterEventDay(event *model.EventDay) error {
 // RegisterEventDay registers a new blacklist
 func RegisterBlacklist(blacklist *model.Blacklist) error {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	err := db.Database.Set(blacklist, db.COLLECTION_BLACKLIST)
 	if err != nil {
@@ -202,7 +202,7 @@ func RegisterBlacklist(blacklist *model.Blacklist) error {
 // RankingExperience returns 50 first users sorted by experience
 func RankingExperience() []KeyValue {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var users []*model.User
 
@@ -220,7 +220,7 @@ func RankingExperience() []KeyValue {
 // RankingExperienceLanguage returns 50 first users sorted by experience for the given language
 func RankingExperienceLanguage(language string) (MapReduceData, error) {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var result MapReduceData
 
@@ -245,7 +245,7 @@ func RankingExperienceLanguage(language string) (MapReduceData, error) {
 // RankingGlobalEventNumber gets from the daily events, the ranking by number of events
 func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var result MapReduceData
 
@@ -276,7 +276,7 @@ func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
 // RankingEventNumber gets from the daily events, the ranking by number of events
 func RankingEventNumber(params ...string) (MapReduceData, error) {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var result MapReduceData
 
@@ -324,7 +324,7 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 // RankingEventExperience gets from the daily events, the ranking by experience
 func RankingEventExperience(params ...string) (MapReduceData, error) {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var result MapReduceData
 
@@ -354,7 +354,7 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 // RankingAllEventTotal returns the total daily events by language
 func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	var result MapReduceData
 
@@ -384,7 +384,7 @@ func GetAllLanguages() (MapReduceData, error) {
 	err := cache.Get("all_languages", &result)
 	if err != nil {
 		db.Database.InitSession()
-		defer db.Database.Db.Session.Close()
+		defer db.Database.Session.Close()
 
 		mapfunc := "function() { this.languages.forEach(function(language) { if (language.name != \"Unknown\" && language.name != \"\") emit(language.name, language.events.pushes);});}"
 
@@ -410,7 +410,7 @@ func GetAllLanguages() (MapReduceData, error) {
 // ClearEventDay removes all elements from events collection
 func ClearEventDay() error {
 	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
+	defer db.Database.Session.Close()
 
 	_, err := db.Database.ClearCollection(db.COLLECTION_EVENT_DAY)
 	if err != nil {
@@ -423,9 +423,6 @@ func ClearEventDay() error {
 
 // FetchAllRankingData builds the result by language or not
 func FetchAllRankingData(typeEvent, language string, useCache bool) map[string](map[string]MapReduceData) {
-	db.Database.InitSession()
-	defer db.Database.Db.Session.Close()
-
 	var data map[string](map[string]MapReduceData) = make(map[string](map[string]MapReduceData))
 
 	err := cache.Get(fmt.Sprintf("ranking-home-%s-%s", typeEvent, strings.Join(strings.Split(language, " "), "")), &data)

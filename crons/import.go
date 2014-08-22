@@ -1,8 +1,8 @@
 package crons
 
 import (
-	"RPGithub/app/model"
-	"RPGithub/app/services"
+	"RPGit/app/model"
+	"RPGit/app/services"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -94,11 +94,11 @@ func (this FullImport) Run() {
 
 			parsed, _ := time.Parse("2006-01-02", date)
 			date = parsed.Add(time.Duration(24) * time.Hour).Format("2006-01-02")
-
-			// Updates caches
-			services.ClearRankingCaches()
-			revel.INFO.Print("Cache cleared")
 		}
+
+		// Updates caches
+		services.ClearRankingCaches()
+		revel.INFO.Print("Cache cleared")
 	}
 }
 

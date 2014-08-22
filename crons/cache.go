@@ -1,7 +1,7 @@
 package crons
 
 import (
-	"RPGithub/app/services"
+	"RPGit/app/services"
 )
 
 // WarmCache warms in-memory cache and clear varnish
