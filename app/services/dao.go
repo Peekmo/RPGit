@@ -111,6 +111,9 @@ func RegisterUser(user *model.User) error {
 		return err
 	}
 
+	db.Database.Index(db.COLLECTION_USER, "username")
+	db.Database.Index(db.COLLECTION_USER, "languages.name")
+
 	return nil
 }
 
@@ -124,6 +127,10 @@ func RegisterEventDay(event *model.EventDay) error {
 		revel.ERROR.Printf("Error while saving new event : %s", err.Error())
 		return err
 	}
+
+	db.Database.Index(db.COLLECTION_EVENT_DAY, "user")
+	db.Database.Index(db.COLLECTION_EVENT_DAY, "language")
+	db.Database.Index(db.COLLECTION_EVENT_DAY, "type")
 
 	return nil
 }
@@ -172,7 +179,9 @@ func RankingExperienceLanguage(language string) (MapReduceData, error) {
 	_, err := db.Database.MapReduce(
 		mapfunc,
 		"function (key, values) { return Array.sum(values) }",
+		"",
 		db.COLLECTION_USER,
+		map[string]string{"languages.name": language},
 		&result,
 	)
 
@@ -202,7 +211,9 @@ func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
 	_, err := db.Database.MapReduce(
 		mapfunc,
 		"function (key, values) { return Array.sum(values) }",
+		"",
 		db.COLLECTION_USER,
+		map[string]string{},
 		&result,
 	)
 
@@ -222,18 +233,21 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 	defer db.Database.Session.Close()
 
 	var result MapReduceData
+	var query = make(map[string]string)
 
-	var mapfunc string
 	if len(params) == 1 {
-		mapfunc = fmt.Sprintf("function() { if (this.type == '%s') { emit(this.user, 1) } }", params[0])
+		query["type"] = params[0]
 	} else {
-		mapfunc = fmt.Sprintf("function() { if (this.type == '%s' && this.language == '%s') { emit(this.user, 1) } }", params[0], params[1])
+		query["type"] = params[0]
+		query["language"] = params[1]
 	}
 
 	_, err := db.Database.MapReduce(
-		mapfunc,
+		"function() { emit(this.user, 1) }",
 		"function (key, values) { return Array.sum(values) }",
+		"user",
 		db.COLLECTION_EVENT_DAY,
+		query,
 		&result,
 	)
 
@@ -272,18 +286,21 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 	defer db.Database.Session.Close()
 
 	var result MapReduceData
+	var query = make(map[string]string)
 
-	var mapfunc string
 	if len(params) == 1 {
-		mapfunc = fmt.Sprintf("function() { if (this.type == '%s') { emit(this.user, this.experience) } }", params[0])
+		query["type"] = params[0]
 	} else {
-		mapfunc = fmt.Sprintf("function() { if (this.type == '%s' && this.language == '%s') { emit(this.user, this.experience) } }", params[0], params[1])
+		query["type"] = params[0]
+		query["language"] = params[1]
 	}
 
 	_, err := db.Database.MapReduce(
-		mapfunc,
+		"function() { emit(this.user, this.experience) }",
 		"function (key, values) { return Array.sum(values) }",
+		"user",
 		db.COLLECTION_EVENT_DAY,
+		query,
 		&result,
 	)
 
@@ -305,13 +322,12 @@ func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
 
 	err := cache.Get("all_languages_daily", &result)
 	if err != nil {
-		var mapfunc string
-		mapfunc = fmt.Sprintf("function() { if (this.type == '%s' && this.language != \"Unknown\") { emit(this.language, 1) } }", typeEvent)
-
 		_, err := db.Database.MapReduce(
-			mapfunc,
+			"function() { emit(this.language, 1);}",
 			"function (key, values) { return Array.sum(values) }",
+			"language",
 			db.COLLECTION_EVENT_DAY,
+			map[string]string{"type": typeEvent},
 			&result,
 		)
 
@@ -337,12 +353,14 @@ func GetAllLanguages() (MapReduceData, error) {
 		db.Database.InitSession()
 		defer db.Database.Session.Close()
 
-		mapfunc := "function() { this.languages.forEach(function(language) { if (language.name != \"Unknown\" && language.name != \"\") emit(language.name, language.events.pushes);});}"
+		mapfunc := "function() { this.languages.forEach(function(language) { emit(language.name, language.events.pushes);});}"
 
 		_, err := db.Database.MapReduce(
 			mapfunc,
 			"function (key, values) { return Array.sum(values) }",
+			"",
 			db.COLLECTION_USER,
+			map[string](map[string]string){"languages.name": map[string]string{"$ne": "Unknown"}},
 			&result,
 		)
 

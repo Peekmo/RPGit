@@ -65,13 +65,22 @@ func (this *Mongo) Remove(query interface{}, collection string) (*mgo.ChangeInfo
 }
 
 // MapReduce executes the given map reduce function
-func (this *Mongo) MapReduce(mapfunc, reduce, collection string, result interface{}) (*mgo.MapReduceInfo, error) {
+func (this *Mongo) MapReduce(mapfunc, reduce, sort, collection string, query, result interface{}) (*mgo.MapReduceInfo, error) {
 	job := &mgo.MapReduce{
 		Map:    mapfunc,
 		Reduce: reduce,
 	}
 
-	return this.Session.DB(db).C(collection).Find(nil).MapReduce(job, result)
+	if sort == "" {
+		return this.Session.DB(db).C(collection).Find(query).MapReduce(job, result)
+	}
+
+	return this.Session.DB(db).C(collection).Find(query).Sort(sort).MapReduce(job, result)
+}
+
+// Index adds and index to the given keys
+func (this *Mongo) Index(collection string, keys ...string) error {
+	return this.Session.DB(db).C(collection).EnsureIndex(mgo.Index{Key: keys})
 }
 
 // Changes db's session (timeout reason)
