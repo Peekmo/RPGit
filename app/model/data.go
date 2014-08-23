@@ -5,14 +5,15 @@ import (
 )
 
 type User struct {
-	Id         string      `json:"id" bson:"_id"`
-	Name       string      `json:"name"`
-	Username   string      `json:"username"`
-	Avatar     string      `json:"avatar"`
-	Level      int         `json:"level"`
-	Experience int         `json:"experience"`
-	Percent    int         `json:"percent"`
-	Languages  []*Language `json:"languages"`
+	Id           string        `json:"id" bson:"_id"`
+	Name         string        `json:"name"`
+	Username     string        `json:"username"`
+	Avatar       string        `json:"avatar"`
+	Level        int           `json:"level"`
+	Experience   int           `json:"experience"`
+	Percent      int           `json:"percent"`
+	Languages    []*Language   `json:"languages"`
+	Repositories []*Repository `json:"repositories"`
 }
 
 type Language struct {
@@ -44,7 +45,7 @@ type Organization struct {
 }
 
 type Repository struct {
-	Id           int    `json:"id" bson:"_id"`
+	Id           int    `json:"id"`
 	Name         string `json:"name"`
 	Size         int    `json:"size"`
 	Url          string `json:"url"`
@@ -115,6 +116,21 @@ func (this *User) GetLanguage(id string) *Language {
 	this.Languages = append(this.Languages, language)
 
 	return language
+}
+
+// GetRepository returns an instance of the repository
+// It creates it if it does not already exists
+func (this *User) GetRepository(id int, name string) *Repository {
+	for _, repository := range this.Repositories {
+		if repository.Id == id {
+			return repository
+		}
+	}
+
+	repository := NewRepository(id, name)
+	this.Repositories = append(this.Repositories, repository)
+
+	return repository
 }
 
 // AddExperience adds the given experience to the language

@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/revel/revel"
@@ -60,18 +61,15 @@ type Import struct{}
 // FullImport to get all data from the beginning
 type FullImport struct{}
 
-// Run is the method called by the cronjob
-// It downloads the archive file and update the database from the first day of the year
-func (this FullImport) Run() {
-	if services.IsFilled() == false {
-		revel.WARN.Print("Importing all data for this year...")
-		date := fmt.Sprintf("%d-01-01", time.Now().Year())
+// doImport does the import process
+func doImport(date string) {
+	services.ClearEventDay()
+	var w sync.WaitGroup
 
-		for date != time.Now().Format("2006-01-02") {
-			revel.INFO.Printf("---------------------> %s <-------------------", date)
-			services.ClearEventDay()
-
-			for i := 0; i < 24; i++ {
+	for i := 0; i < 24; i = i + 3 {
+		w.Add(3)
+		for y := 0; y < 3; y++ {
+			go func(date string, i int) {
 				fullPath, err := Download(fmt.Sprintf("%s-%d", date, i))
 				if err != nil {
 					revel.ERROR.Println(err.Error())
@@ -90,15 +88,26 @@ func (this FullImport) Run() {
 				if err != nil {
 					revel.ERROR.Println(err.Error())
 				}
-			}
+				revel.INFO.Print(fmt.Sprintf("%s-%d", date, i))
 
-			parsed, _ := time.Parse("2006-01-02", date)
-			date = parsed.Add(time.Duration(24) * time.Hour).Format("2006-01-02")
+				w.Done()
+			}(date, i+y)
 		}
+		w.Wait()
+	}
 
-		// Updates caches
-		services.ClearRankingCaches()
-		revel.INFO.Print("Cache cleared")
+	// Updates caches
+	services.ClearRankingCaches()
+	revel.INFO.Print("Cache cleared")
+}
+
+// Run is the method called by the cronjob
+// It downloads the archive file and update the database from the first day of the year
+func (this FullImport) Run() {
+	if services.IsFilled() == false {
+		revel.WARN.Print("First import...")
+		date := time.Now().Add(-time.Duration(48) * time.Hour).Format("2006-01-02")
+		doImport(date)
 	}
 }
 
@@ -106,34 +115,7 @@ func (this FullImport) Run() {
 // It downloads the archive file and update the database
 func (this Import) Run() {
 	date := time.Now().Add(-time.Duration(24) * time.Hour).Format("2006-01-02")
-
-	// Clear all events
-	services.ClearEventDay()
-
-	for i := 0; i < 24; i++ {
-		fullPath, err := Download(fmt.Sprintf("%s-%d", date, i))
-		if err != nil {
-			revel.ERROR.Println(err.Error())
-			return
-		}
-		revel.INFO.Printf("%s", fullPath)
-		data, err := Ungzip(fullPath)
-		if err != nil {
-			revel.ERROR.Println(err.Error())
-		}
-
-		Parse(data, true)
-
-		// Removes the file
-		err = os.Remove(fullPath)
-		if err != nil {
-			revel.ERROR.Println(err.Error())
-		}
-	}
-
-	// Updates caches
-	services.ClearRankingCaches()
-	revel.INFO.Print("Cache cleared")
+	doImport(date)
 }
 
 // Download Downloads the archive file from githubarchive
@@ -242,17 +224,7 @@ func Parse(data string, ranking bool) {
 		}
 
 		// ------------------------------------- GET REPOSITORY
-		repository := services.GetRepository(jsonmap.Repository.Id)
-		if repository == nil {
-			// New repository
-			repository = model.NewRepository(
-				jsonmap.Repository.Id,
-				jsonmap.Repository.Name,
-			)
-
-			// Register the repository
-			services.RegisterRepository(repository)
-		}
+		repository := user.GetRepository(jsonmap.Repository.Id, jsonmap.Repository.Name)
 
 		repository.Size = jsonmap.Repository.Size
 		repository.Url = jsonmap.Repository.Url
@@ -342,6 +314,5 @@ func Parse(data string, ranking bool) {
 
 		// Updates database data
 		services.UpdateUser(user)
-		services.UpdateRepository(repository)
 	}
 }

@@ -72,8 +72,8 @@
 							<hr>
 						</h4>
 
-						@{ if .repositories }@
-							@{ range .repositories }@
+						@{ if .user.Repositories }@
+							@{ range .user.Repositories }@
 							<div class="ui rp-item">
 								<div class="ui purple label profile"><i class="icon circular info"></i><a href="@{ .Url }@" target="_blank">@{ .Name }@ </a>@{ if .IsFork }@ (fork) @{ end }@</div>
 								<div class="floating ui red label rp-floating-item">@{ .Language }@</div>

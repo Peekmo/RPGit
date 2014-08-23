@@ -46,12 +46,12 @@ func IsFilled() bool {
 	db.Database.InitSession()
 	defer db.Database.Session.Close()
 
-	var repositories []*model.Repository
+	var users []*model.User
 
-	data := db.Database.GetQuery(map[string]string{}, db.COLLECTION_REPOSITORY)
-	data.Limit(1).All(&repositories)
+	data := db.Database.GetQuery(map[string]string{}, db.COLLECTION_USER)
+	data.Limit(1).All(&users)
 
-	return (len(repositories) == 1)
+	return (len(users) == 1)
 }
 
 // GetUser gets a user from the database
@@ -86,35 +86,6 @@ func IsBlacklisted(name string) bool {
 	return true
 }
 
-// GetRepository gets a new repository from the database
-func GetRepository(id int) *model.Repository {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
-
-	var repository *model.Repository
-
-	repositoryData := db.Database.Get(id, db.COLLECTION_REPOSITORY)
-	err := repositoryData.One(&repository)
-	if err != nil {
-		return nil
-	}
-
-	return repository
-}
-
-// GetUserRepositories gets a list of repositories from the given user
-func GetUserRepositories(username string) []*model.Repository {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
-
-	var repositories []*model.Repository
-
-	data := db.Database.GetQuery(map[string]string{"owner": strings.ToLower(username)}, db.COLLECTION_REPOSITORY)
-	data.All(&repositories)
-
-	return repositories
-}
-
 // UpdateUser updates the given user from the database
 func UpdateUser(user *model.User) error {
 	db.Database.InitSession()
@@ -123,34 +94,6 @@ func UpdateUser(user *model.User) error {
 	err := db.Database.Update(user.Id, user, db.COLLECTION_USER)
 	if err != nil {
 		revel.ERROR.Printf("Error while updating data : %s", err.Error())
-		return err
-	}
-
-	return nil
-}
-
-// UpdateRepository updates the repository in the database
-func UpdateRepository(repository *model.Repository) error {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
-
-	err := db.Database.Update(repository.Id, repository, db.COLLECTION_REPOSITORY)
-	if err != nil {
-		revel.ERROR.Printf("Error while updating data : %s", err.Error())
-		return err
-	}
-
-	return nil
-}
-
-// RegisterRepository register in database a new repository
-func RegisterRepository(repository *model.Repository) error {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
-
-	err := db.Database.Set(repository, db.COLLECTION_REPOSITORY)
-	if err != nil {
-		revel.ERROR.Printf("Error while saving new repository : %s", err.Error())
 		return err
 	}
 
@@ -299,8 +242,10 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 		return nil, err
 	}
 
+	revel.INFO.Print("Sorting..")
 	sort.Sort(result)
 
+	revel.INFO.Print("Blacklisting..")
 	// Checks for limit of events per day (to remove bots)
 	if params[0] == "pushevent" {
 		index := 0
@@ -358,22 +303,28 @@ func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
 
 	var result MapReduceData
 
-	var mapfunc string
-	mapfunc = fmt.Sprintf("function() { if (this.type == '%s' && this.language != \"Unknown\") { emit(this.language, 1) } }", typeEvent)
-
-	_, err := db.Database.MapReduce(
-		mapfunc,
-		"function (key, values) { return Array.sum(values) }",
-		db.COLLECTION_EVENT_DAY,
-		&result,
-	)
-
+	err := cache.Get("all_languages_daily", &result)
 	if err != nil {
-		revel.ERROR.Printf("Error while mapreducing event total : %s", err.Error())
-		return nil, err
+		var mapfunc string
+		mapfunc = fmt.Sprintf("function() { if (this.type == '%s' && this.language != \"Unknown\") { emit(this.language, 1) } }", typeEvent)
+
+		_, err := db.Database.MapReduce(
+			mapfunc,
+			"function (key, values) { return Array.sum(values) }",
+			db.COLLECTION_EVENT_DAY,
+			&result,
+		)
+
+		if err != nil {
+			revel.ERROR.Printf("Error while mapreducing event total : %s", err.Error())
+			return nil, err
+		}
+
+		sort.Sort(result)
+
+		cache.Set("all_languages_daily", result, cache.DEFAULT)
 	}
 
-	sort.Sort(result)
 	return result, nil
 }
 
@@ -437,18 +388,28 @@ func FetchAllRankingData(typeEvent, language string, useCache bool) map[string](
 		var globalNumber MapReduceData
 
 		if language != "" {
+			revel.INFO.Print("Daily number")
 			dailyNumber, _ = RankingEventNumber(typeEvent, language)
+			revel.INFO.Print("Daily xp")
 			dailyExperience, _ = RankingEventExperience(typeEvent, language)
+			revel.INFO.Print("global xp")
 			globalExperience, _ = RankingExperienceLanguage(language)
+			revel.INFO.Print("global number")
 			globalNumber, _ = RankingGlobalEventNumber(typeEvent, language)
 		} else {
+			revel.INFO.Print("Daily number")
 			dailyNumber, _ = RankingEventNumber(typeEvent)
+			revel.INFO.Print("Daily xp")
 			dailyExperience, _ = RankingEventExperience(typeEvent)
+			revel.INFO.Print("global xp")
 			globalExperience = RankingExperience()
+			revel.INFO.Print("global number")
 			globalNumber, _ = RankingGlobalEventNumber(typeEvent)
 		}
 
+		revel.INFO.Print("daily all number")
 		dailyLanguage, _ := RankingAllEventTotal(typeEvent)
+		revel.INFO.Print("global all number")
 		globalLanguage, _ := GetAllLanguages()
 
 		data["daily"] = map[string]MapReduceData{
@@ -474,9 +435,17 @@ func ClearRankingCaches() {
 	revel.INFO.Print("Clearing memory cache...")
 
 	cache.Delete("all_languages")
+	revel.INFO.Print("All languages")
 	languages, _ := GetAllLanguages()
+
+	cache.Delete("all_languages_daily")
+	revel.INFO.Print("All languages daily")
+	RankingAllEventTotal("pushevent")
+
+	revel.INFO.Print("All pushes")
 	FetchAllRankingData("pushevent", "", false)
 	for _, language := range languages {
+		revel.INFO.Printf("Language %s", language.Key)
 		FetchAllRankingData("pushevent", language.Key, false)
 	}
 

@@ -42,15 +42,13 @@ func (c Interface) User(username string) revel.Result {
 		return c.NotFound("User not found")
 	}
 
-	repositories := services.GetUserRepositories(username)
-
 	sort.Sort(sort.Reverse(model.LanguageArray(user.Languages)))
-	sort.Sort(sort.Reverse(model.RepositoryArray(repositories)))
+	sort.Sort(sort.Reverse(model.RepositoryArray(user.Repositories)))
 
 	var languages []*Language
 	for _, language := range user.Languages {
 		languages = append(languages, &Language{language.Name, language.Level})
 	}
 
-	return c.Render(user, repositories, languages)
+	return c.Render(user, languages)
 }
