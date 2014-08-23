@@ -10,6 +10,12 @@ jQuery(function($) {
 	// Init sidebar
 	$('.ui.sidebar').sidebar();
 
+	if (window.innerWidth >= 1000) {
+		$('#show-menu').fadeOut();
+		$('.sidebar').sidebar('show');
+		$('.sidebar').sidebar('pull page');
+	}
+
 	$('#close').click(function(e) {
 		$('.sidebar').sidebar('hide', function() {
 			$('#show-menu').fadeIn();

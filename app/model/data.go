@@ -145,8 +145,8 @@ func (this *Language) AddExperience(xp int) {
 
 // getLevel returns the level for the given experience
 func getLevel(level, experience int) int {
-	if experience >= getExperience(level) {
-		return level + 1
+	for experience >= getExperience(level) {
+		level += 1
 	}
 
 	return level

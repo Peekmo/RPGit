@@ -10,7 +10,8 @@ body {
 	color: white;
 }
 
-.links a {
+.links a,
+.content-about a {
 	font-weight: bold;
 	color: #74D0F1;	
 	text-decoration: none;
@@ -74,6 +75,15 @@ body {
 	font-weight: bold;
 }
 
+.ui.selection.list
+.item {
+	cursor: default;
+}
+
+a {
+	cursor: pointer !important;
+}
+
 .ui.menu .item.active.nav,
 .ui.inverted.pointing.menu .active.item.nav:after {
 	background-color: #FF7D49;
@@ -96,6 +106,7 @@ body {
 	top: 60px;
 	margin: auto;
 	position: absolute;
+	background-color: white;
 }
 
 .profile-container {
@@ -225,6 +236,12 @@ body {
 
 .ui.grid.hide {
 	display: none;
+}
+
+.content-about {
+	font-size: 13pt !important;
+	padding-left: 40px !important;
+	padding-right: 40px !important;
 }
 
 @media only screen and (max-width: 600px) {

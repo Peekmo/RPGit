@@ -35,30 +35,30 @@
 						@{ range .user.Languages }@
 						<div class="ui rp-item">
 							<div class="floating ui red label rp-floating-item">@{ .Name }@</div>
-							<a class="ui purple label rp-item-meta"><i class="circular icon tint"></i>Level @{ .Level }@</a>
+							<div class="ui purple label rp-item-meta"><i class="circular icon tint"></i>Level @{ .Level }@</div>
 							<div class="ui blue progress profile-item">
 								<div class="bar" style="width: @{ .Percent }@%;"></div>
 							</div>
 
 							<div class="ui divided selection list">
-								<a class="item">
+								<div class="item">
 									<div class="ui @{ colorLanguage .Events.Pushes 10 50 }@ horizontal label">@{ .Events.Pushes }@</div> Pushes
-								</a>
-								<a class="item">
+								</div>
+								<div class="item">
 									<div class="ui @{ colorLanguage .Events.Pullrequests 1 5 }@ horizontal label">@{ .Events.Pullrequests }@</div> Pull requests
-								</a>
-								<a class="item">
+								</div>
+								<div class="item">
 									<div class="ui @{ colorLanguage .Events.Issues 1 10 }@ horizontal label">@{ .Events.Issues }@</div> Issues opened
-								</a>
-								<a class="item">
+								</div>
+								<div class="item">
 									<div class="ui @{ colorLanguage .Events.Comments 10 30 }@ horizontal label">@{ .Events.Comments }@</div> Comments
-								</a>
-								<a class="item">
+								</div>
+								<div class="item">
 									<div class="ui @{ colorLanguage .Events.Forks 1 5 }@ horizontal label">@{ .Events.Forks }@</div> Forks
-								</a>
-								<a class="item">
+								</div>
+								<div class="item">
 									<div class="ui @{ colorLanguage .Events.Stars 3 10 }@ horizontal label">@{ .Events.Stars }@</div> Stars
-								</a>
+								</div>
 							</div>
 						</div>
 						@{ end }@
@@ -80,18 +80,18 @@
 								<p>@{ .Description }@</p>
 
 								<div class="ui divided selection list">
-									<a class="item">
+									<div class="item">
 										<div class="ui @{ invertColorLanguage .Issues 1 10 }@ horizontal label">@{ .Issues }@</div> Issues opened
-									</a>
-									<a class="item">
+									</div>
+									<div class="item">
 										<div class="ui @{ colorLanguage .Forks 5 20 }@ horizontal label">@{ .Forks }@</div> Forks
-									</a>
-									<a class="item">
+									</div>
+									<div class="item">
 										<div class="ui @{ colorLanguage .Stars 5 20 }@ horizontal label">@{ .Stars }@</div> Stars
-									</a>
-									<a class="item">
+									</div>
+									<div class="item">
 										<div class="ui @{ if .Wiki }@ green @{ else }@ red @{ end }@ horizontal label">@{ if .Wiki }@ Yes @{ else }@ No @{ end }@</div> Wiki
-									</a>
+									</div>
 								</div>
 
 							</div>	

@@ -1,4 +1,4 @@
-@{ set . "title" "Home" }@
+@{ set . "title" "RPGit | Role Playing Git" }@
 @{ set . "languages" .languages }@
 @{ set . "unit" "Sorted by pushes (on 1.000.000)" }@
 @{ template "header.html" .}@
@@ -8,18 +8,19 @@
 	<div class="two wide column"></div>
 	<div class="twelve wide column rp-container first-container">
 		<div class="ui pointing fluid three item menu inverted nav-menu">
+			<a class="item nav index" data-tab="about">About <i class="circular icon info letter"></i></a>
 			<a class="active item nav index" data-tab="daily">Daily ranking <i class=" circular icon star"></i></a>
 			<a class="item nav index" data-tab="global">Global ranking <i class="circular icon signal"></i></a>
-			<a class="item nav index" data-tab="about">About <i class="circular icon info letter"></i></a>
 		</div>
 
 		<!--             DAILY RANKING             -->
 		<div class="ui three column grid stackable columns-container tab" data-tab="daily">
+			<div class="text-center column sixteen wide"><h4 class="ui header">Yesterday's ranking</h4>Updated everyday around 1am PDT</div>
 			<div class="column">
 				<div class="rp-item homepage text-center">
 					<h2 class="ui header"><i class="icon circular dashboard"></i></h2>
 					<a href="" class="ui label profile purple" id="daily-top-number-link"><h5 class="ui header" id="daily-top-number-name"></h5></a>
-					<a class="ui label profile red"><h5 class="ui header" id="daily-top-number-value"></h5></a>
+					<div class="ui label profile red"><h5 class="ui header" id="daily-top-number-value"></h5></div>
 
 					<a class="ui label profile green show-ranking" data-type="daily-number"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
 				</div>
@@ -28,7 +29,7 @@
 				<div class="rp-item homepage text-center">
 					<h2 class="ui header"><i class="icon circular legal"></i></h2>
 					<a href="" class="ui label profile purple" id="daily-top-experience-link"><h5 class="ui header" id="daily-top-experience-name"></h5></a>
-					<a class="ui label profile red"><h5 class="ui header" id="daily-top-experience-value"></h5></a>
+					<div class="ui label profile red"><h5 class="ui header" id="daily-top-experience-value"></h5></div>
 
 					<a class="ui label profile green show-ranking" data-type="daily-experience"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
 				</div>
@@ -36,8 +37,8 @@
 			<div class="column">
 				<div class="rp-item homepage text-center">
 					<h2 class="ui header"><i class="icon circular terminal"></i></h2>
-					<a class="ui label profile purple"><h5 class="ui header" id="daily-top-language-name"></h5></a>
-					<a class="ui label profile red"><h5 class="ui header" id="daily-top-language-value"></h5></a>
+					<div class="ui label profile purple"><h5 class="ui header" id="daily-top-language-name"></h5></div>
+					<div class="ui label profile red"><h5 class="ui header" id="daily-top-language-value"></h5></div>
 
 					<a class="ui label profile green show-ranking" data-type="daily-language"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
 				</div>
@@ -47,11 +48,12 @@
 
 		<!--              GLOBAL RANKING                -->
 		<div class="ui three column grid columns-container tab" data-tab="global">
+			<div class="text-center column sixteen wide"><h4 class="ui header">Overhall ranking</h4>Updated everyday around 1am PDT</div>
 			<div class="column">
 				<div class="rp-item homepage text-center">
 					<h2 class="ui header"><i class="icon circular dashboard"></i></h2>
 					<a href="" class="ui label profile purple" id="global-top-number-link"><h5 class="ui header" id="global-top-number-name"></h5></a>
-					<a class="ui label profile red"><h5 class="ui header" id="global-top-number-value"></h5></a>
+					<div class="ui label profile red"><h5 class="ui header" id="global-top-number-value"></h5></div>
 
 					<a class="ui label profile green show-ranking" data-type="global-number"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
 				</div>
@@ -60,7 +62,7 @@
 				<div class="rp-item homepage text-center">
 					<h2 class="ui header"><i class="icon circular legal"></i></h2>
 					<a href="" class="ui label profile purple" id="global-top-experience-link"><h5 class="ui header" id="global-top-experience-name"></h5></a>
-					<a class="ui label profile red"><h5 class="ui header" id="global-top-experience-value"></h5></a>
+					<div class="ui label profile red"><h5 class="ui header" id="global-top-experience-value"></h5></div>
 
 					<a class="ui label profile green show-ranking" data-type="global-experience"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
 				</div>
@@ -68,8 +70,8 @@
 			<div class="column">
 				<div class="rp-item homepage text-center">
 					<h2 class="ui header"><i class="icon circular terminal"></i></h2>
-					<a class="ui label profile purple"><h5 class="ui header" id="global-top-language-name"></h5></a>
-					<a class="ui label profile red"><h5 class="ui header" id="global-top-language-value"></h5></a>
+					<div class="ui label profile purple"><h5 class="ui header" id="global-top-language-name"></h5></div>
+					<div class="ui label profile red"><h5 class="ui header" id="global-top-language-value"></h5></div>
 
 					<a class="ui label profile green show-ranking" data-type="global-language"><h5 class="ui header"><i class="icon circular add sign"></i></h5></a>
 				</div>
@@ -77,8 +79,31 @@
 		</div>
 
 		<!--              ABOUT           -->
-		<div class="ui three column grid columns-container tab" data-tab="about">
-			<div class="column">About</div>
+		<div class="ui one column grid columns-container tab" data-tab="about">
+			<div class="column content-about">
+				<h3 class="ui header">
+					<i class="icon heart"></i>
+					Welcome on RPGit !
+				</h3>
+
+				<hr>
+
+				<p>This website has been created by  <a target="_blank" href="http://github.com/Peekmo">Axel Anceau (@Peekmo)</a> for the third annual Data Github Challenge.</p>
+
+				<p>It's a small "Role Playing Git", based on a Github's events analyze. For each events from a user (issue, pull request, push), your experience will increase (the number of experience points won depends on the repository popularity).</p>
+
+				<p>Every day, a global and a daily ranking are updated, suspects accounts (more than 250 pushes in a day), are removed. You can either, looking for a given user profile and check its languages stats (and repository stats). <a href="https://github.com/Peekmo/RPGit/wiki" target="_blank">Read the wiki</a> for more technicals informations.</p>
+
+				<p>It's an  <a target="_blank" href="http://github.com/Peekmo/rpgit">open source</a> project, built with a lot of open source tools such as :</p>
+				<ul>
+					<li><a href="http://golang.org/" target="_blank">Go programming language</a></li>
+					<li><a href="http://revel.github.io/" target="_blank">Revel framework (backend)</a></li>
+					<li><a href="http://semantic-ui.com/" target="_blank">Semantic UI framework (frontend)</a></li>
+					<li><a href="http://www.mongodb.org/" target="_blank">MongoDB as a database</a></li>
+					<li><a href="https://labix.org/mgo" target="_blank">mgo as MongoDB connector</a></li>
+					<li><a href="http://handlebarsjs.com/" target="_blank">Handlerbars JS</a></li>
+				</ul>
+			</div>
 		</div>
 
 		<!--              RANKINGS            -->
@@ -120,6 +145,14 @@
 		<a class="item" href="/users/{{ key }}">
 			<div class="ui teal horizontal label">{{ value }}</div> {{ key }}
 		</a>
+	{{/each}}
+</script>
+
+<script id="overview-ranking-languages" type="text/x-handlebars-template">
+	{{#each this}}
+		<div class="item">
+			<div class="ui teal horizontal label">{{ value }}</div> {{ key }}
+		</div>
 	{{/each}}
 </script>
 

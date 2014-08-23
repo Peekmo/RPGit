@@ -83,14 +83,22 @@ func (this *Mongo) Index(collection string, keys ...string) error {
 	return this.Session.DB(db).C(collection).EnsureIndex(mgo.Index{Key: keys})
 }
 
-// Changes db's session (timeout reason)
-func (this *Mongo) InitSession() {
+// InitSession Changes db's session (timeout reason)
+func (this *Mongo) InitSession() *mgo.Session {
 	if session == nil {
 		session, _ = mgo.Dial(url)
 		session.SetSocketTimeout(1 * time.Hour)
 	}
 
-	this.Session = session.Copy()
+	return session.Copy()
+}
+
+// Copy gets a new instance of Mongo struct
+func (this *Mongo) Copy(sess *mgo.Session) *Mongo {
+	newInstance := *this
+	newInstance.Session = sess
+
+	return &newInstance
 }
 
 // InitDatabse initialize the mongodb session

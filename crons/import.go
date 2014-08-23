@@ -224,7 +224,15 @@ func Parse(data string, ranking bool) {
 		}
 
 		// ------------------------------------- GET REPOSITORY
-		repository := user.GetRepository(jsonmap.Repository.Id, jsonmap.Repository.Name)
+		ownerRepo := services.GetUser(strings.ToLower(jsonmap.Repository.Owner))
+		if ownerRepo == nil {
+			// New user
+			ownerRepo = model.NewUser(strings.ToLower(jsonmap.Repository.Owner))
+
+			// Register the user
+			services.RegisterUser(ownerRepo)
+		}
+		repository := ownerRepo.GetRepository(jsonmap.Repository.Id, jsonmap.Repository.Name)
 
 		repository.Size = jsonmap.Repository.Size
 		repository.Url = jsonmap.Repository.Url
@@ -248,7 +256,7 @@ func Parse(data string, ranking bool) {
 			language.Events.Pushes += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					xp = 2 * (key + 1)
+					xp = 2 + key
 					break
 				}
 			}
@@ -265,7 +273,7 @@ func Parse(data string, ranking bool) {
 			language.Events.Issues += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					xp = 3 * (key + 1)
+					xp = 3 + key
 					break
 				}
 			}
@@ -286,7 +294,7 @@ func Parse(data string, ranking bool) {
 			language.Events.Pullrequests += 1
 			for key, value := range steps {
 				if jsonmap.Repository.Stars < value {
-					xp = 5 * (key + 1)
+					xp = 5 + key
 					break
 				}
 			}
@@ -314,5 +322,6 @@ func Parse(data string, ranking bool) {
 
 		// Updates database data
 		services.UpdateUser(user)
+		services.UpdateUser(ownerRepo)
 	}
 }

@@ -62,12 +62,17 @@ var Home = {
 		this.language = undefined;
 		this.data = {};
 		this.tpl = Handlebars.compile($("#overview-ranking").html());
+		this.tplLang = Handlebars.compile($("#overview-ranking-languages").html());
 	},
 
 	render: function(data) {
 		for (var kind in data) {
 			for (var type in data[kind]) {
-				$("#" + kind + "-" + type).html(this.tpl(data[kind][type]));
+				if (type == "language") {
+					$("#" + kind + "-" + type).html(this.tplLang(data[kind][type]));
+				} else {
+					$("#" + kind + "-" + type).html(this.tpl(data[kind][type]));
+				}
 				
 				if (data[kind][type].length > 0) {
 					$("#" + kind + "-top-" + type + "-name").html(data[kind][type][0].key);

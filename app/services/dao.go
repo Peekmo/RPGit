@@ -43,12 +43,13 @@ func InitDatabase() {
 // IsFilled allows to know if the data has been filled in database or not
 // It checks for the number of repositories
 func IsFilled() bool {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var users []*model.User
 
-	data := db.Database.GetQuery(map[string]string{}, db.COLLECTION_USER)
+	data := database.GetQuery(map[string]string{}, db.COLLECTION_USER)
 	data.Limit(1).All(&users)
 
 	return (len(users) == 1)
@@ -56,12 +57,13 @@ func IsFilled() bool {
 
 // GetUser gets a user from the database
 func GetUser(username string) *model.User {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var user *model.User
 
-	userData := db.Database.Get(strings.ToLower(username), db.COLLECTION_USER)
+	userData := database.Get(strings.ToLower(username), db.COLLECTION_USER)
 	err := userData.One(&user)
 	if err != nil {
 		return nil
@@ -72,12 +74,13 @@ func GetUser(username string) *model.User {
 
 // IsBlacklisted checks if the given user is blacklisted or not
 func IsBlacklisted(name string) bool {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var blacklist *model.Blacklist
 
-	blacklistData := db.Database.Get(strings.ToLower(name), db.COLLECTION_BLACKLIST)
+	blacklistData := database.Get(strings.ToLower(name), db.COLLECTION_BLACKLIST)
 	err := blacklistData.One(&blacklist)
 	if err != nil {
 		return false
@@ -88,10 +91,11 @@ func IsBlacklisted(name string) bool {
 
 // UpdateUser updates the given user from the database
 func UpdateUser(user *model.User) error {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
-	err := db.Database.Update(user.Id, user, db.COLLECTION_USER)
+	err := database.Update(user.Id, user, db.COLLECTION_USER)
 	if err != nil {
 		revel.ERROR.Printf("Error while updating data : %s", err.Error())
 		return err
@@ -102,45 +106,48 @@ func UpdateUser(user *model.User) error {
 
 // RegisterRepository register in database a new repository
 func RegisterUser(user *model.User) error {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
-	err := db.Database.Set(user, db.COLLECTION_USER)
+	err := database.Set(user, db.COLLECTION_USER)
 	if err != nil {
 		revel.ERROR.Printf("Error while saving new user : %s", err.Error())
 		return err
 	}
 
-	db.Database.Index(db.COLLECTION_USER, "username")
-	db.Database.Index(db.COLLECTION_USER, "languages.name")
+	database.Index(db.COLLECTION_USER, "username")
+	database.Index(db.COLLECTION_USER, "languages.name")
 
 	return nil
 }
 
 // RegisterEventDay registers a new event
 func RegisterEventDay(event *model.EventDay) error {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
-	err := db.Database.Set(event, db.COLLECTION_EVENT_DAY)
+	err := database.Set(event, db.COLLECTION_EVENT_DAY)
 	if err != nil {
 		revel.ERROR.Printf("Error while saving new event : %s", err.Error())
 		return err
 	}
 
-	db.Database.Index(db.COLLECTION_EVENT_DAY, "user")
-	db.Database.Index(db.COLLECTION_EVENT_DAY, "language")
-	db.Database.Index(db.COLLECTION_EVENT_DAY, "type")
+	database.Index(db.COLLECTION_EVENT_DAY, "user")
+	database.Index(db.COLLECTION_EVENT_DAY, "language")
+	database.Index(db.COLLECTION_EVENT_DAY, "type")
 
 	return nil
 }
 
 // RegisterEventDay registers a new blacklist
 func RegisterBlacklist(blacklist *model.Blacklist) error {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
-	err := db.Database.Set(blacklist, db.COLLECTION_BLACKLIST)
+	err := database.Set(blacklist, db.COLLECTION_BLACKLIST)
 	if err != nil {
 		revel.ERROR.Printf("Error while saving new blacklist : %s", err.Error())
 		return err
@@ -151,12 +158,13 @@ func RegisterBlacklist(blacklist *model.Blacklist) error {
 
 // RankingExperience returns 50 first users sorted by experience
 func RankingExperience() []KeyValue {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var users []*model.User
 
-	data := db.Database.GetQuery(map[string]string{}, db.COLLECTION_USER).Sort("-experience").Limit(50)
+	data := database.GetQuery(map[string]string{}, db.COLLECTION_USER).Sort("-experience").Limit(50)
 	data.All(&users)
 
 	var formatted []KeyValue
@@ -169,14 +177,15 @@ func RankingExperience() []KeyValue {
 
 // RankingExperienceLanguage returns 50 first users sorted by experience for the given language
 func RankingExperienceLanguage(language string) (MapReduceData, error) {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var result MapReduceData
 
 	mapfunc := fmt.Sprintf("function() { for (var lang in this.languages) { if (this.languages[lang].name == '%s') { emit(this.username, this.languages[lang].experience); return; } } }", language)
 
-	_, err := db.Database.MapReduce(
+	_, err := database.MapReduce(
 		mapfunc,
 		"function (key, values) { return Array.sum(values) }",
 		"",
@@ -196,8 +205,9 @@ func RankingExperienceLanguage(language string) (MapReduceData, error) {
 
 // RankingGlobalEventNumber gets from the daily events, the ranking by number of events
 func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var result MapReduceData
 
@@ -208,7 +218,7 @@ func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
 		mapfunc = fmt.Sprintf("function() { for (var lang in this.languages) { if (this.languages[lang].name == '%s') { emit(this.username, this.languages[lang].events.pushes); return; } } }", params[1])
 	}
 
-	_, err := db.Database.MapReduce(
+	_, err := database.MapReduce(
 		mapfunc,
 		"function (key, values) { return Array.sum(values) }",
 		"",
@@ -229,8 +239,9 @@ func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
 
 // RankingEventNumber gets from the daily events, the ranking by number of events
 func RankingEventNumber(params ...string) (MapReduceData, error) {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var result MapReduceData
 	var query = make(map[string]string)
@@ -242,7 +253,7 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 		query["language"] = params[1]
 	}
 
-	_, err := db.Database.MapReduce(
+	_, err := database.MapReduce(
 		"function() { emit(this.user, 1) }",
 		"function (key, values) { return Array.sum(values) }",
 		"user",
@@ -269,8 +280,9 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 				break
 			} else {
 				RegisterBlacklist(model.NewBlacklist(value.Key, fmt.Sprintf("Number of events too big (%d)", value.Value)))
-				db.Database.Remove(map[string]string{"user": value.Key}, db.COLLECTION_EVENT_DAY)
-				db.Database.Remove(map[string]string{"_id": value.Key}, db.COLLECTION_USER)
+
+				database.Remove(map[string]string{"user": value.Key}, db.COLLECTION_EVENT_DAY)
+				database.Remove(map[string]string{"_id": value.Key}, db.COLLECTION_USER)
 			}
 		}
 
@@ -282,8 +294,9 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 
 // RankingEventExperience gets from the daily events, the ranking by experience
 func RankingEventExperience(params ...string) (MapReduceData, error) {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var result MapReduceData
 	var query = make(map[string]string)
@@ -295,7 +308,7 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 		query["language"] = params[1]
 	}
 
-	_, err := db.Database.MapReduce(
+	_, err := database.MapReduce(
 		"function() { emit(this.user, this.experience) }",
 		"function (key, values) { return Array.sum(values) }",
 		"user",
@@ -315,14 +328,15 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 
 // RankingAllEventTotal returns the total daily events by language
 func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
 	var result MapReduceData
 
 	err := cache.Get("all_languages_daily", &result)
 	if err != nil {
-		_, err := db.Database.MapReduce(
+		_, err := database.MapReduce(
 			"function() { emit(this.language, 1);}",
 			"function (key, values) { return Array.sum(values) }",
 			"language",
@@ -350,12 +364,13 @@ func GetAllLanguages() (MapReduceData, error) {
 
 	err := cache.Get("all_languages", &result)
 	if err != nil {
-		db.Database.InitSession()
-		defer db.Database.Session.Close()
+		session := db.Database.InitSession()
+		database := db.Database.Copy(session)
+		defer session.Close()
 
 		mapfunc := "function() { this.languages.forEach(function(language) { emit(language.name, language.events.pushes);});}"
 
-		_, err := db.Database.MapReduce(
+		_, err := database.MapReduce(
 			mapfunc,
 			"function (key, values) { return Array.sum(values) }",
 			"",
@@ -378,10 +393,11 @@ func GetAllLanguages() (MapReduceData, error) {
 
 // ClearEventDay removes all elements from events collection
 func ClearEventDay() error {
-	db.Database.InitSession()
-	defer db.Database.Session.Close()
+	session := db.Database.InitSession()
+	database := db.Database.Copy(session)
+	defer session.Close()
 
-	_, err := db.Database.ClearCollection(db.COLLECTION_EVENT_DAY)
+	_, err := database.ClearCollection(db.COLLECTION_EVENT_DAY)
 	if err != nil {
 		revel.ERROR.Printf("Error while clearing events collection : %s", err.Error())
 		return err
