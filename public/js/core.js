@@ -13,7 +13,10 @@ jQuery(function($) {
 	if (window.innerWidth >= 1000) {
 		$('#show-menu').fadeOut();
 		$('.sidebar').sidebar('show');
-		$('.sidebar').sidebar('pull page');
+
+		if (window.screen.width < 1000) {
+			$('.sidebar').sidebar('pull page');
+		}
 	}
 
 	$('#close').click(function(e) {
@@ -35,11 +38,19 @@ jQuery(function($) {
 		$(this).addClass('filter-language-selected');
 	});
 
+	$('#reset').click(function(e) {
+		$('.filter-language').removeClass('filter-language-selected');
+	});
+
 
 	$('#show-menu').click(function(e) {
 		$('#show-menu').fadeOut();
 		$('.sidebar').sidebar('show');
-		$('.sidebar').sidebar('pull page');
+
+
+		if (window.innerWidth < 1000) {
+			$('.sidebar').sidebar('pull page');
+		}
 	});
 
 	$('#search-btn').click(function(e) {

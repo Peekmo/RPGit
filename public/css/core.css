@@ -201,7 +201,6 @@ a {
 }
 
 .ui.label.show-menu {
-	float: left;
 	position: fixed;
 	top: 30px;
 	margin: 0 !important;
