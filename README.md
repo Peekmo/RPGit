@@ -12,3 +12,5 @@ It's an open source project, built with a lot of open source tools such as :
 * [MongoDB as a database](http://www.mongodb.org/)
 * [mgo as MongoDB connector](https://labix.org/mgo)
 * [Handlerbars JS](http://handlebarsjs.com/)
+
+You can read the [wiki](https://github.com/Peekmo/RPGit/wiki) to know more about how to install the project.
