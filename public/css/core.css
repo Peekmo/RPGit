@@ -234,6 +234,10 @@ a {
 	text-decoration: none;
 }
 
+.twitter-share-button {
+	margin-top: 5px;
+}
+
 .ui.grid.hide {
 	display: none;
 }
@@ -244,8 +248,14 @@ a {
 	padding-right: 40px !important;
 }
 
-.filter-language-selected {
-	background-color: #FF7D49;
+.error-icon {
+	font-size: 200px !important;
+	margin-left: 50px !important;
+}
+
+.filter-language-selected,
+.filter-language-selected:hover {
+	background-color: #FF7D49 !important;
 	color: white !important;
 }
 

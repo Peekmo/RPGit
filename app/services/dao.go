@@ -267,10 +267,8 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 		return nil, err
 	}
 
-	revel.INFO.Print("Sorting..")
 	sort.Sort(result)
 
-	revel.INFO.Print("Blacklisting..")
 	// Checks for limit of events per day (to remove bots)
 	if params[0] == "pushevent" {
 		index := 0
@@ -375,7 +373,7 @@ func GetAllLanguages() (MapReduceData, error) {
 			"function (key, values) { return Array.sum(values) }",
 			"",
 			db.COLLECTION_USER,
-			map[string](map[string]string){"languages.name": map[string]string{"$ne": "Unknown"}},
+			map[string]string{},
 			&result,
 		)
 
@@ -465,8 +463,9 @@ func ClearRankingCaches() {
 	RankingAllEventTotal("pushevent")
 
 	FetchAllRankingData("pushevent", "", false)
-	for _, language := range languages {
-		revel.INFO.Printf("Language %s", language.Key)
+	var total = len(languages)
+	for key, language := range languages {
+		revel.WARN.Printf("Language %s (%d/%d)", language.Key, key+1, total)
 		FetchAllRankingData("pushevent", language.Key, false)
 	}
 

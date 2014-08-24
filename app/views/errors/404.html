@@ -1,21 +1,24 @@
 @{ set . "title" "Not found" }@
 @{ template "header.html" .}@
 
-@{ if eq .RunMode "dev" }@
+@{ if eq .RunMode "fd" }@
 @{ template "errors/404-dev.html" . }@
 @{ else }@
 	<div class="header-rpg header-rpg-home"></div>
 	<div class="ui column page grid">
 		<div class="two wide column"></div>
 		<div class="twelve wide column rp-container first-container">
-			<div class="ui one column columns-container">
-
+			<div class="ui one column columns-container text-center">
+			<i class="error-icon icon remove circle"></i>
 			@{ with .Error }@
 			<h1>
 				@{ .Title }@
 			</h1>
 			<p>
-				@{ .Description }@
+				<p>@{ .Description }@</p>
+				@{ if eq .Description "User not found" }@
+					<p>Please, not that just data from @{ importDate }@ till yesterday are imported</p>
+				@{ end }@
 			</p>
 			@{ end }@
 			</div>
