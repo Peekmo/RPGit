@@ -302,10 +302,10 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 	var query = make(map[string]string)
 
 	if len(params) == 1 {
-		query["type"] = params[0]
-	} else {
-		query["type"] = params[0]
-		query["language"] = params[1]
+		query["language"] = params[0]
+	} else if len(params) == 2 {
+		query["language"] = params[0]
+		query["type"] = params[1]
 	}
 
 	_, err := database.MapReduce(
@@ -341,7 +341,7 @@ func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
 			"function (key, values) { return Array.sum(values) }",
 			"language",
 			db.COLLECTION_EVENT_DAY,
-			map[string]string{"type": typeEvent},
+			map[string](interface{}){"type": typeEvent, "language": map[string]string{"$ne": "Unknown"}},
 			&result,
 		)
 
@@ -423,12 +423,12 @@ func FetchAllRankingData(typeEvent, language string, useCache bool) map[string](
 
 		if language != "" {
 			dailyNumber, _ = RankingEventNumber(typeEvent, language)
-			dailyExperience, _ = RankingEventExperience(typeEvent, language)
+			dailyExperience, _ = RankingEventExperience(language)
 			globalExperience, _ = RankingExperienceLanguage(language)
 			globalNumber, _ = RankingGlobalEventNumber(typeEvent, language)
 		} else {
 			dailyNumber, _ = RankingEventNumber(typeEvent)
-			dailyExperience, _ = RankingEventExperience(typeEvent)
+			dailyExperience, _ = RankingEventExperience()
 			globalExperience = RankingExperience()
 			globalNumber, _ = RankingGlobalEventNumber(typeEvent)
 		}

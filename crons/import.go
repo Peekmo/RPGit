@@ -224,28 +224,38 @@ func Parse(data string, ranking bool) {
 		}
 
 		// ------------------------------------- GET REPOSITORY
-		ownerRepo := services.GetUser(strings.ToLower(jsonmap.Repository.Owner))
-		if ownerRepo == nil {
-			// New user
-			ownerRepo = model.NewUser(strings.ToLower(jsonmap.Repository.Owner))
+		// No organizations
+		var ownerRepo *model.User
+		if jsonmap.Repository.Organization != "" {
+			ownerRepo = services.GetUser(strings.ToLower(jsonmap.Repository.Owner))
+			if ownerRepo == nil {
+				// New user
+				ownerRepo = model.NewUser(strings.ToLower(jsonmap.Repository.Owner))
 
-			// Register the user
-			services.RegisterUser(ownerRepo)
+				// Register the user
+				services.RegisterUser(ownerRepo)
+			}
+
+			var repository *model.Repository
+			if ownerRepo.Id == user.Id {
+				repository = user.GetRepository(jsonmap.Repository.Id, jsonmap.Repository.Name)
+			} else {
+				repository = ownerRepo.GetRepository(jsonmap.Repository.Id, jsonmap.Repository.Name)
+			}
+
+			repository.Size = jsonmap.Repository.Size
+			repository.Url = jsonmap.Repository.Url
+			repository.Language = jsonmap.Repository.Language
+			repository.Owner = strings.ToLower(jsonmap.Repository.Owner)
+			repository.Organization = strings.ToLower(jsonmap.Repository.Organization)
+			repository.Wiki = jsonmap.Repository.Wiki
+			repository.Downloads = jsonmap.Repository.Downloads
+			repository.Forks = jsonmap.Repository.Forks
+			repository.Stars = jsonmap.Repository.Stars
+			repository.Issues = jsonmap.Repository.Issues
+			repository.IsFork = jsonmap.Repository.IsFork
+			repository.Description = jsonmap.Repository.Description
 		}
-		repository := ownerRepo.GetRepository(jsonmap.Repository.Id, jsonmap.Repository.Name)
-
-		repository.Size = jsonmap.Repository.Size
-		repository.Url = jsonmap.Repository.Url
-		repository.Language = jsonmap.Repository.Language
-		repository.Owner = strings.ToLower(jsonmap.Repository.Owner)
-		repository.Organization = strings.ToLower(jsonmap.Repository.Organization)
-		repository.Wiki = jsonmap.Repository.Wiki
-		repository.Downloads = jsonmap.Repository.Downloads
-		repository.Forks = jsonmap.Repository.Forks
-		repository.Stars = jsonmap.Repository.Stars
-		repository.Issues = jsonmap.Repository.Issues
-		repository.IsFork = jsonmap.Repository.IsFork
-		repository.Description = jsonmap.Repository.Description
 
 		language := user.GetLanguage(jsonmap.Repository.Language)
 
@@ -322,6 +332,8 @@ func Parse(data string, ranking bool) {
 
 		// Updates database data
 		services.UpdateUser(user)
-		services.UpdateUser(ownerRepo)
+		if jsonmap.Repository.Organization != "" && ownerRepo.Id != user.Id {
+			services.UpdateUser(ownerRepo)
+		}
 	}
 }
