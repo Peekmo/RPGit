@@ -30,11 +30,15 @@
 
 	@{ if .languages }@
 	<h3 class="ui header"><i class="icon circular filter inline"></i>Filter <a class="ui red label reset" onclick="reset()" id="reset">Reset</a></h3>
-	<div class="text-center">@{ .unit }@</div>
+	@{ if $.showValueLanguage }@
+		<div class="text-center">@{ .unit }@</div>
+	@{ end }@
 	<div class="ui fluid vertical menu">
 		@{ range .languages }@
-		<a class="item" onclick="filter(@{ .Key }@)">
-			<div class="ui label">@{ .Value }@</div>
+		<a class="item filter-language" onclick="filter(@{ .Key }@)">
+			@{ if $.showValueLanguage }@
+				<div class="ui label">@{ .Value }@</div>
+			@{ end }@
 			@{ .Key }@
 		</a>
 		@{ end }@

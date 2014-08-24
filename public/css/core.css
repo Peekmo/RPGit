@@ -244,6 +244,11 @@ a {
 	padding-right: 40px !important;
 }
 
+.filter-language-selected {
+	background-color: #FF7D49;
+	color: white !important;
+}
+
 @media only screen and (max-width: 600px) {
 	.profile-container {
 		width: 200px;

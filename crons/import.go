@@ -88,7 +88,7 @@ func doImport(date string) {
 				if err != nil {
 					revel.ERROR.Println(err.Error())
 				}
-				revel.INFO.Print(fmt.Sprintf("%s-%d", date, i))
+				revel.WARN.Print(fmt.Sprintf("%s-%d", date, i))
 
 				w.Done()
 			}(date, i+y)

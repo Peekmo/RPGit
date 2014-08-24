@@ -50,5 +50,6 @@ func (c Interface) User(username string) revel.Result {
 		languages = append(languages, &Language{language.Name, language.Level})
 	}
 
-	return c.Render(user, languages)
+	var showValueLanguage = true
+	return c.Render(user, languages, showValueLanguage)
 }

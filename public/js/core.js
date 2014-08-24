@@ -30,6 +30,11 @@ jQuery(function($) {
 		document.location.href = "/";
 	});
 
+	$('.filter-language').click(function(e) {
+		$('.filter-language').removeClass('filter-language-selected');
+		$(this).addClass('filter-language-selected');
+	});
+
 
 	$('#show-menu').click(function(e) {
 		$('#show-menu').fadeOut();
