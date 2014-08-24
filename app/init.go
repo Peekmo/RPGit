@@ -45,7 +45,7 @@ var HeaderFilter = func(c *revel.Controller, fc []revel.Filter) {
 	c.Response.Out.Header().Add("X-Frame-Options", "SAMEORIGIN")
 	c.Response.Out.Header().Add("X-XSS-Protection", "1; mode=block")
 	c.Response.Out.Header().Add("X-Content-Type-Options", "nosniff")
-	c.Response.Out.Header().Add("Cache-Control", "max-age=100000, public")
+	c.Response.Out.Header().Add("Cache-Control", "s-maxage=3600, private")
 
 	fc[0](c, fc[1:]) // Execute the next filter stage.
 }

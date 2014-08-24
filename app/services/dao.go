@@ -275,7 +275,7 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 	if params[0] == "pushevent" {
 		index := 0
 		for key, value := range result {
-			if value.Value < revel.Config.IntDefault("blacklist.limit", 200) {
+			if value.Value < revel.Config.IntDefault("blacklist.limit", 250) {
 				index = key
 				break
 			} else {
@@ -422,28 +422,18 @@ func FetchAllRankingData(typeEvent, language string, useCache bool) map[string](
 		var globalNumber MapReduceData
 
 		if language != "" {
-			revel.INFO.Print("Daily number")
 			dailyNumber, _ = RankingEventNumber(typeEvent, language)
-			revel.INFO.Print("Daily xp")
 			dailyExperience, _ = RankingEventExperience(typeEvent, language)
-			revel.INFO.Print("global xp")
 			globalExperience, _ = RankingExperienceLanguage(language)
-			revel.INFO.Print("global number")
 			globalNumber, _ = RankingGlobalEventNumber(typeEvent, language)
 		} else {
-			revel.INFO.Print("Daily number")
 			dailyNumber, _ = RankingEventNumber(typeEvent)
-			revel.INFO.Print("Daily xp")
 			dailyExperience, _ = RankingEventExperience(typeEvent)
-			revel.INFO.Print("global xp")
 			globalExperience = RankingExperience()
-			revel.INFO.Print("global number")
 			globalNumber, _ = RankingGlobalEventNumber(typeEvent)
 		}
 
-		revel.INFO.Print("daily all number")
 		dailyLanguage, _ := RankingAllEventTotal(typeEvent)
-		revel.INFO.Print("global all number")
 		globalLanguage, _ := GetAllLanguages()
 
 		data["daily"] = map[string]MapReduceData{
@@ -469,14 +459,11 @@ func ClearRankingCaches() {
 	revel.INFO.Print("Clearing memory cache...")
 
 	cache.Delete("all_languages")
-	revel.INFO.Print("All languages")
 	languages, _ := GetAllLanguages()
 
 	cache.Delete("all_languages_daily")
-	revel.INFO.Print("All languages daily")
 	RankingAllEventTotal("pushevent")
 
-	revel.INFO.Print("All pushes")
 	FetchAllRankingData("pushevent", "", false)
 	for _, language := range languages {
 		revel.INFO.Printf("Language %s", language.Key)

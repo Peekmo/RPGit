@@ -4,14 +4,23 @@
 @{ if eq .RunMode "dev" }@
 @{ template "errors/404-dev.html" . }@
 @{ else }@
-	@{ with .Error }@
-	<h1>
-		@{ .Title }@
-	</h1>
-	<p>
-		@{ .Description }@
-	</p>
-	@{ end }@
+	<div class="header-rpg header-rpg-home"></div>
+	<div class="ui column page grid">
+		<div class="two wide column"></div>
+		<div class="twelve wide column rp-container first-container">
+			<div class="ui one column columns-container">
+
+			@{ with .Error }@
+			<h1>
+				@{ .Title }@
+			</h1>
+			<p>
+				@{ .Description }@
+			</p>
+			@{ end }@
+			</div>
+		</div>
+	</div>
 @{ end }@
 	</body>
 </html>

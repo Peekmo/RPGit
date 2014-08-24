@@ -159,7 +159,7 @@ func getPercent(level, experience int) int {
 
 // getExperience returns experience needed for the next level
 func getExperience(level int) int {
-	return (level * 10) + ((level - 1) * 10)
+	return level * level * 2
 }
 
 // ----- Sorts
