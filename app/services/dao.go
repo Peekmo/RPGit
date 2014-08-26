@@ -5,7 +5,6 @@ import (
 	"RPGit/app/model"
 	"fmt"
 	"math"
-	"sort"
 	"strings"
 
 	"github.com/revel/revel"
@@ -191,7 +190,6 @@ func RankingExperienceLanguage(language string) (MapReduceData, error) {
 		"",
 		db.COLLECTION_USER,
 		map[string]string{"languages.name": language},
-		&result,
 	)
 
 	if err != nil {
@@ -199,7 +197,9 @@ func RankingExperienceLanguage(language string) (MapReduceData, error) {
 		return nil, err
 	}
 
-	sort.Sort(result)
+	data := database.GetQuery(map[string]string{}, db.COLLECTION_MAPREDUCE).Sort("-value")
+	data.All(&result)
+
 	return result, nil
 }
 
@@ -224,7 +224,6 @@ func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
 		"",
 		db.COLLECTION_USER,
 		map[string]string{},
-		&result,
 	)
 
 	if err != nil {
@@ -232,7 +231,8 @@ func RankingGlobalEventNumber(params ...string) (MapReduceData, error) {
 		return nil, err
 	}
 
-	sort.Sort(result)
+	data := database.GetQuery(map[string]string{}, db.COLLECTION_MAPREDUCE).Sort("-value").Limit(50)
+	data.All(&result)
 
 	return result, nil
 }
@@ -259,7 +259,6 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 		"user",
 		db.COLLECTION_EVENT_DAY,
 		query,
-		&result,
 	)
 
 	if err != nil {
@@ -267,7 +266,8 @@ func RankingEventNumber(params ...string) (MapReduceData, error) {
 		return nil, err
 	}
 
-	sort.Sort(result)
+	data := database.GetQuery(map[string]string{}, db.COLLECTION_MAPREDUCE).Sort("-value")
+	data.All(&result)
 
 	// Checks for limit of events per day (to remove bots)
 	if params[0] == "pushevent" {
@@ -312,7 +312,6 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 		"user",
 		db.COLLECTION_EVENT_DAY,
 		query,
-		&result,
 	)
 
 	if err != nil {
@@ -320,7 +319,9 @@ func RankingEventExperience(params ...string) (MapReduceData, error) {
 		return nil, err
 	}
 
-	sort.Sort(result)
+	data := database.GetQuery(map[string]string{}, db.COLLECTION_MAPREDUCE).Sort("-value").Limit(50)
+	data.All(&result)
+
 	return result, nil
 }
 
@@ -340,7 +341,6 @@ func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
 			"language",
 			db.COLLECTION_EVENT_DAY,
 			map[string](interface{}){"type": typeEvent, "language": map[string]string{"$ne": "Unknown"}},
-			&result,
 		)
 
 		if err != nil {
@@ -348,7 +348,8 @@ func RankingAllEventTotal(typeEvent string) (MapReduceData, error) {
 			return nil, err
 		}
 
-		sort.Sort(result)
+		data := database.GetQuery(map[string]string{}, db.COLLECTION_MAPREDUCE).Sort("-value").Limit(50)
+		data.All(&result)
 
 		cache.Set("all_languages_daily", result, cache.DEFAULT)
 	}
@@ -366,7 +367,7 @@ func GetAllLanguages() (MapReduceData, error) {
 		database := db.Database.Copy(session)
 		defer session.Close()
 
-		mapfunc := "function() { this.languages.forEach(function(language) { emit(language.name, language.events.pushes);});}"
+		mapfunc := "function() { this.languages.forEach(function(language) { if (language.name != \"Unknown\") { emit(language.name, language.events.pushes);}});}"
 
 		_, err := database.MapReduce(
 			mapfunc,
@@ -374,7 +375,6 @@ func GetAllLanguages() (MapReduceData, error) {
 			"",
 			db.COLLECTION_USER,
 			map[string]string{},
-			&result,
 		)
 
 		if err != nil {
@@ -382,7 +382,9 @@ func GetAllLanguages() (MapReduceData, error) {
 			return nil, err
 		}
 
-		sort.Sort(result)
+		data := database.GetQuery(map[string]string{}, db.COLLECTION_MAPREDUCE).Sort("-value")
+		data.All(&result)
+
 		cache.Set("all_languages", result, cache.DEFAULT)
 	}
 
@@ -436,14 +438,14 @@ func FetchAllRankingData(typeEvent, language string, useCache bool) map[string](
 
 		data["daily"] = map[string]MapReduceData{
 			"number":     dailyNumber[0:int(math.Min(float64(len(dailyNumber)), float64(50)))],
-			"experience": dailyExperience[0:int(math.Min(float64(len(dailyExperience)), float64(50)))],
-			"language":   dailyLanguage[0:int(math.Min(float64(len(dailyLanguage)), float64(50)))],
+			"experience": dailyExperience,
+			"language":   dailyLanguage,
 		}
 
 		data["global"] = map[string]MapReduceData{
-			"number":     globalNumber[0:int(math.Min(float64(len(globalNumber)), float64(50)))],
-			"experience": globalExperience[0:int(math.Min(float64(len(globalExperience)), float64(50)))],
-			"language":   globalLanguage[0:int(math.Min(float64(len(dailyLanguage)), float64(50)))],
+			"number":     globalNumber,
+			"experience": globalExperience,
+			"language":   globalLanguage,
 		}
 
 		cache.Set(fmt.Sprintf("ranking-home-%s-%s", typeEvent, strings.Join(strings.Split(language, " "), "")), data, cache.DEFAULT)

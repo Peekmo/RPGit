@@ -24,8 +24,8 @@ var (
 const (
 	COLLECTION_USER         = "User"
 	COLLECTION_BLACKLIST    = "Blacklist"
+	COLLECTION_MAPREDUCE    = "MapReduces"
 	COLLECTION_EVENT_DAY    = "EventDay"
-	COLLECTION_REPOSITORY   = "Repository"
 	COLLECTION_ORGANIZATION = "Organization"
 )
 
@@ -65,17 +65,24 @@ func (this *Mongo) Remove(query interface{}, collection string) (*mgo.ChangeInfo
 }
 
 // MapReduce executes the given map reduce function
-func (this *Mongo) MapReduce(mapfunc, reduce, sort, collection string, query, result interface{}) (*mgo.MapReduceInfo, error) {
+func (this *Mongo) MapReduce(mapfunc, reduce, sort, collection string, query interface{}) (*mgo.MapReduceInfo, error) {
 	job := &mgo.MapReduce{
 		Map:    mapfunc,
 		Reduce: reduce,
+		Out: map[string]string{
+			"replace": COLLECTION_MAPREDUCE,
+		},
 	}
 
 	if sort == "" {
-		return this.Session.DB(db).C(collection).Find(query).MapReduce(job, result)
+		info, err := this.Session.DB(db).C(collection).Find(query).MapReduce(job, nil)
+		this.Index(COLLECTION_MAPREDUCE, "value")
+		return info, err
 	}
 
-	return this.Session.DB(db).C(collection).Find(query).Sort(sort).MapReduce(job, result)
+	info, err := this.Session.DB(db).C(collection).Find(query).Sort(sort).MapReduce(job, nil)
+	this.Index(COLLECTION_MAPREDUCE, "value")
+	return info, err
 }
 
 // Index adds and index to the given keys

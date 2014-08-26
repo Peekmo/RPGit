@@ -226,7 +226,7 @@ func Parse(data string, ranking bool) {
 		// ------------------------------------- GET REPOSITORY
 		// No organizations
 		var ownerRepo *model.User
-		if jsonmap.Repository.Organization != "" {
+		if jsonmap.Repository.Organization == "" {
 			ownerRepo = services.GetUser(strings.ToLower(jsonmap.Repository.Owner))
 			if ownerRepo == nil {
 				// New user
@@ -332,7 +332,7 @@ func Parse(data string, ranking bool) {
 
 		// Updates database data
 		services.UpdateUser(user)
-		if jsonmap.Repository.Organization != "" && ownerRepo.Id != user.Id {
+		if jsonmap.Repository.Organization == "" && ownerRepo.Id != user.Id {
 			services.UpdateUser(ownerRepo)
 		}
 	}

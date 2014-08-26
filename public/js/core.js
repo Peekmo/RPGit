@@ -14,7 +14,7 @@ jQuery(function($) {
 		$('#show-menu').fadeOut();
 		$('.sidebar').sidebar('show');
 
-		if (window.screen.width < 1000) {
+		if (window.innerWidth < 1000 || window.innerWidth > 1500) {
 			$('.sidebar').sidebar('pull page');
 		}
 	}
@@ -48,7 +48,7 @@ jQuery(function($) {
 		$('.sidebar').sidebar('show');
 
 
-		if (window.innerWidth < 1000) {
+		if (window.innerWidth < 1000 || window.innerWidth > 1500) {
 			$('.sidebar').sidebar('pull page');
 		}
 	});
