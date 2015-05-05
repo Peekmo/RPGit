@@ -1,4 +1,4 @@
-# [RPGit](http://rp-git.com)
+# RPGit
 
 This project is a small "Role Playing Git", based on a Github's events analyze. For each events from a user (issue, pull request, push), your experience will increase (the number of experience points won depends on the repository popularity).
 
